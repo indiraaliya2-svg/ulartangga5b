@@ -3,404 +3,338 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ular Tangga Edukatif SD</title>
+    <title>Petualangan Ular Tangga 30 - Edukatif</title>
     <style>
         :root {
-            --primary: #4CAF50;
-            --secondary: #FF9800;
-            --danger: #f44336;
-            --sky: #E0F7FA;
+            --primary-color: #4CAF50;
+            --secondary-color: #FF9800;
+            --bg-color: #E0F7FA;
+            --text-color: #333;
+            --correct-color: #8BC34A;
+            --wrong-color: #EF5350;
+            --p1-color: #f44336;
+            --p2-color: #2196F3;
+            --p3-color: #FFEB3B;
+            --p4-color: #9C27B0;
+            --p5-color: #FF5722;
         }
 
         body {
-            font-family: 'Arial Rounded MT Bold', 'Helvetica', sans-serif;
-            background-color: var(--sky);
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin: 0;
-            padding: 10px;
         }
 
-        #game-wrapper {
+        #game-container {
             display: flex;
             gap: 20px;
-            max-width: 1000px;
-            background: white;
-            padding: 20px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            max-width: 1100px;
+            width: 100%;
         }
 
-        /* --- BOARD --- */
+        /* PAPAN 30 KOTAK (6 Kolom x 5 Baris) */
         #board-container {
             position: relative;
             width: 500px;
-            height: 500px;
+            height: 420px;
+            background-color: white;
+            border: 8px solid #8D6E63;
+            border-radius: 15px;
             display: grid;
-            grid-template-columns: repeat(10, 1fr);
-            grid-template-rows: repeat(10, 1fr);
-            border: 5px solid #5D4037;
-            background: #fff;
+            grid-template-columns: repeat(6, 1fr);
+            grid-template-rows: repeat(5, 1fr);
         }
 
         .cell {
-            border: 0.5px solid #eee;
+            border: 1px solid #ddd;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 10px;
             position: relative;
             font-weight: bold;
-            color: #ccc;
         }
 
-        .cell:nth-child(even) { background: #fdfdfd; }
-
-        #overlay-svg {
+        .cell-number {
             position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
+            top: 2px;
+            left: 5px;
+            font-size: 0.8em;
+            color: #888;
+        }
+
+        /* SVG untuk Ular dan Tangga */
+        #snakes-ladders-svg {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none;
             z-index: 5;
         }
 
-        /* --- PION --- */
         .pion {
-            width: 20px;
-            height: 20px;
+            width: 25px;
+            height: 25px;
             border-radius: 50%;
+            border: 2px solid white;
             position: absolute;
             z-index: 10;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 2px solid white;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: all 0.4s ease;
+            transform: translate(-50%, -50%);
         }
 
-        /* --- UI --- */
-        #controls {
-            width: 300px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+        .pion-1 { background-color: var(--p1-color); }
+        .pion-2 { background-color: var(--p2-color); }
+        .pion-3 { background-color: var(--p3-color); }
+        .pion-4 { background-color: var(--p4-color); }
+        .pion-5 { background-color: var(--p5-color); }
+
+        #control-panel {
+            flex: 1;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
 
-        .stats {
-            background: #f8f9fa;
-            padding: 10px;
+        #dice {
+            width: 60px; height: 60px;
+            border: 3px solid #333;
             border-radius: 10px;
-            font-size: 14px;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 2em; margin: 10px auto;
         }
 
-        button {
-            padding: 15px;
-            font-size: 18px;
-            cursor: pointer;
-            border: none;
-            border-radius: 10px;
-            background: var(--secondary);
-            color: white;
-            font-weight: bold;
-            transition: 0.2s;
-        }
-
-        button:hover { filter: brightness(1.1); }
-        button:disabled { background: #ccc; }
-
-        /* --- MODAL SOAL --- */
+        /* MODAL SOAL */
         #quiz-modal {
             position: fixed;
-            top:0; left:0; width:100%; height:100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.8);
             display: none;
-            justify-content: center;
-            align-items: center;
+            justify-content: center; align-items: center;
             z-index: 100;
         }
 
-        .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 20px;
-            text-align: center;
-            max-width: 400px;
-            width: 90%;
+        #quiz-container {
+            background: white; padding: 30px; border-radius: 20px;
+            text-align: center; max-width: 400px; width: 90%;
         }
 
-        .ans-btns {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 20px;
+        .option-btn {
+            display: block; width: 100%; padding: 10px; margin: 5px 0;
+            cursor: pointer; border-radius: 10px; border: 1px solid #ccc;
         }
-
-        .ans-btn { background: #eee; color: #333; font-size: 14px; }
-        .ans-btn.correct { background: var(--primary); color: white; }
-        .ans-btn.wrong { background: var(--danger); color: white; }
-
-        .dice-view {
-            font-size: 50px;
-            text-align: center;
-            margin: 10px 0;
-        }
+        
+        .correct { background-color: var(--correct-color) !important; color: white; }
+        .wrong { background-color: var(--wrong-color) !important; color: white; }
     </style>
 </head>
 <body>
 
-    <h1 style="color: #2E7D32;">🐍 Ular Tangga Angka Pintar 🪜</h1>
+    <h1>🐍 Ular Tangga Edukatif (1-30) 🪜</h1>
 
-    <div id="game-wrapper">
-        <div id="board-container">
-            <svg id="overlay-svg">
-                <defs>
-                    <marker id="arrow" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto">
-                        <path d="M0,0 L10,5 L0,10 Z" fill="green" />
-                    </marker>
-                </defs>
-            </svg>
-            <!-- Sel & Pion akan diisi JS -->
+    <div id="game-container">
+        <div id="board-container" id="board">
+            <svg id="snakes-ladders-svg"></svg>
         </div>
 
-        <div id="controls">
-            <div class="stats" id="info-turn">Klik "Mulai" untuk bermain!</div>
-            <div class="dice-view" id="dice-icon">🎲</div>
-            <button id="btn-main">Mulai Permainan</button>
-            <button id="btn-roll" disabled>Lempar Dadu</button>
-            
-            <div id="scoreboard" class="stats">
-                <strong>Skor:</strong><br>
-                <div id="score-list"></div>
+        <div id="control-panel">
+            <div id="setup">
+                <button id="start-btn" onclick="startGame()" style="padding: 15px 30px; font-size: 1.2em; cursor:pointer;">MULAI PERMAINAN</button>
+                <p>Klik mulai untuk mengaktifkan musik & suara!</p>
+            </div>
+
+            <div id="play-area" style="display:none;">
+                <div id="turn-info" style="padding:10px; text-align:center; color:white; font-weight:bold; border-radius:10px;">Pemain 1</div>
+                <div id="dice">?</div>
+                <button id="roll-btn" onclick="rollDice()" style="width:100%; padding:10px; cursor:pointer;">Lempar Dadu</button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL QUIZ -->
+    <!-- MODAL SOAL -->
     <div id="quiz-modal">
-        <div class="modal-content">
-            <h3 id="quiz-q">Pertanyaan</h3>
-            <div id="quiz-story" style="font-size: 12px; font-style: italic; margin-bottom: 10px; background: #f0f0f0; padding: 5px; display:none;"></div>
-            <div class="ans-btns" id="ans-container"></div>
-            <div id="input-box" style="display:none; margin-top:15px;">
-                <input type="text" id="raw-input" style="padding:10px; width:80%;">
-                <button id="btn-submit-input" style="padding:5px 10px; font-size:14px; margin-top:5px;">Kirim</button>
-            </div>
+        <div id="quiz-container">
+            <h3 id="q-text">Pertanyaan akan muncul di sini?</h3>
+            <div id="options"></div>
         </div>
     </div>
+
+    <!-- AUDIO ASSETS -->
+    <!-- Catatan: Ganti URL ini dengan file suara asli Anda jika ingin offline -->
+    <audio id="bgm" loop src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"></audio>
+    <audio id="snd-ting" src="https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3"></audio>
+    <audio id="snd-tetot" src="https://assets.mixkit.co/active_storage/sfx/2955/2955-preview.mp3"></audio>
 
     <script>
-        /** --- AUDIO ENGINE (CDN LINKS) --- **/
-        const sounds = {
-            bg: new Audio('https://assets.mixkit.co/music/preview/mixkit-funny-paws-583.mp3'),
-            correct: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-winning-chime-2029.mp3'),
-            wrong: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-funny-fail-low-tone-2856.mp3'),
-            move: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-click-melodic-1120.mp3'),
-            win: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-video-game-win-2016.mp3')
-        };
-        sounds.bg.loop = true;
-        sounds.bg.volume = 0.3;
-
-        /** --- KONFIGURASI GAME --- **/
-        const boardSize = 10;
-        let players = [];
+        const totalCells = 30;
+        const columns = 6;
+        const players = [];
         let currentPlayer = 0;
-        let snakesLadders = {};
-        const colors = ['#f44336', '#2196F3', '#FFEB3B', '#9C27B0', '#FF9800'];
         
+        // Konfigurasi Ular & Tangga {dari: ke}
+        const links = {
+            3: 15,  // Tangga
+            8: 20,  // Tangga
+            17: 5,  // Ular
+            24: 12, // Ular
+            21: 29  // Tangga
+        };
+
         const questions = [
-            { type: 'pg', q: "Berat semangka itu...", a: "delapan kilogram", b: "8 kilogram", correct: "b" },
-            { type: 'pg', q: "Harga buku itu...", a: "Rp5.000,00", b: "lima ribu rupiah", correct: "a" },
-            { type: 'bs', q: "Rp15.000,00", correct: "B" },
-            { type: 'bs', q: "lima meter", correct: "S" },
-            { type: 'isi', q: "Ibu membeli gula ___ kilogram", correct: "2" },
-            { type: 'baca', story: "Siti berangkat jam 08.00, tiba jam 11.00.", q: "Berapa jam perjalanan?", a: "3 jam", b: "2 jam", correct: "a" }
+            { q: "Berapa 5 + 5?", a: ["8", "10", "12"], c: 1 },
+            { q: "Ibu membeli 3 apel, lalu beli lagi 2. Berapa jumlahnya?", a: ["5", "6", "4"], c: 0 },
+            { q: "Ejaan angka 12 yang benar?", a: ["Dua belas", "Dua blas", "Sepuluh dua"], c: 0 },
+            { q: "Simbol angka delapan?", a: ["7", "9", "8"], c: 2 }
         ];
 
-        /** --- CORE LOGIC --- **/
-        function initBoard() {
-            const container = document.getElementById('board-container');
-            for (let i = 100; i >= 1; i--) {
+        function createBoard() {
+            const board = document.getElementById('board-container');
+            for (let i = totalCells; i >= 1; i--) {
                 const cell = document.createElement('div');
                 cell.className = 'cell';
-                cell.id = `cell-${i}`;
-                cell.innerHTML = `<span>${i}</span>`;
+                cell.innerHTML = `<span class="cell-number">${i}</span>`;
                 
-                // Urutan Ular (Boustrophedon)
-                let row = Math.floor((100 - i) / 10);
-                let col = (100 - i) % 10;
-                if (row % 2 === 1) cell.style.gridColumn = col + 1;
-                else cell.style.gridColumn = 10 - col;
+                // Layout ular (boustrophedon)
+                let row = Math.floor((totalCells - i) / columns);
+                let col = (totalCells - i) % columns;
+                cell.style.gridColumn = (row % 2 === 0) ? (columns - col) : (col + 1);
                 
-                container.appendChild(cell);
-            }
-            generateSnakesLadders();
-        }
-
-        function generateSnakesLadders() {
-            // Acak 4 Tangga & 4 Ular
-            for(let i=0; i<4; i++) {
-                let startL = Math.floor(Math.random() * 80) + 2;
-                let endL = startL + Math.floor(Math.random() * 15) + 5;
-                if(endL < 100) snakesLadders[startL] = endL;
-
-                let startS = Math.floor(Math.random() * 80) + 20;
-                let endS = startS - Math.floor(Math.random() * 15) - 5;
-                if(endS > 1) snakesLadders[startS] = endS;
+                cell.setAttribute('data-id', i);
+                board.appendChild(cell);
             }
             drawLinks();
         }
 
         function drawLinks() {
-            const svg = document.getElementById('overlay-svg');
-            for (let start in snakesLadders) {
-                let end = snakesLadders[start];
-                let startEl = document.getElementById(`cell-${start}`).getBoundingClientRect();
-                let endEl = document.getElementById(`cell-${end}`).getBoundingClientRect();
-                let boardEl = document.getElementById('board-container').getBoundingClientRect();
+            const svg = document.getElementById('snakes-ladders-svg');
+            setTimeout(() => {
+                for (let start in links) {
+                    let end = links[start];
+                    let startEl = document.querySelector(`[data-id="${start}"]`).getBoundingClientRect();
+                    let endEl = document.querySelector(`[data-id="${end}"]`).getBoundingClientRect();
+                    let boardEl = document.getElementById('board-container').getBoundingClientRect();
 
-                let line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                line.setAttribute("x1", startEl.left - boardEl.left + 25);
-                line.setAttribute("y1", startEl.top - boardEl.top + 25);
-                line.setAttribute("x2", endEl.left - boardEl.left + 25);
-                line.setAttribute("y2", endEl.top - boardEl.top + 25);
-                line.setAttribute("stroke", end > start ? "green" : "red");
-                line.setAttribute("stroke-width", "3");
-                line.setAttribute("stroke-dasharray", end > start ? "none" : "5,5");
-                svg.appendChild(line);
-            }
+                    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                    line.setAttribute("x1", startEl.left - boardEl.left + 40);
+                    line.setAttribute("y1", startEl.top - boardEl.top + 40);
+                    line.setAttribute("x2", endEl.left - boardEl.left + 40);
+                    line.setAttribute("y2", endEl.top - boardEl.top + 40);
+                    
+                    if (end > start) {
+                        line.setAttribute("stroke", "green"); // Tangga
+                        line.setAttribute("stroke-width", "10");
+                        line.setAttribute("stroke-dasharray", "4");
+                    } else {
+                        line.setAttribute("stroke", "red"); // Ular
+                        line.setAttribute("stroke-width", "6");
+                    }
+                    svg.appendChild(line);
+                }
+            }, 500);
         }
 
-        /** --- GAMEPLAY --- **/
-        document.getElementById('btn-main').onclick = function() {
-            sounds.bg.play(); // Mulai Backsound
-            this.style.display = 'none';
-            document.getElementById('btn-roll').disabled = false;
-            setupPlayers();
-            updateUI();
-        };
-
-        function setupPlayers() {
-            for(let i=0; i<5; i++) {
-                players.push({ id: i, pos: 1, score: 0, color: colors[i] });
-                let p = document.createElement('div');
-                p.className = 'pion';
-                p.id = `pion-${i}`;
-                p.style.backgroundColor = colors[i];
-                document.getElementById('board-container').appendChild(p);
-                moveVisual(i, 1);
+        function startGame() {
+            document.getElementById('bgm').play();
+            document.getElementById('setup').style.display = 'none';
+            document.getElementById('play-area').style.display = 'block';
+            
+            const colors = ['var(--p1-color)', 'var(--p2-color)', 'var(--p3-color)', 'var(--p4-color)', 'var(--p5-color)'];
+            for (let i = 0; i < 5; i++) {
+                players.push({ pos: 1, color: colors[i] });
+                const pEl = document.createElement('div');
+                pEl.className = `pion pion-${i+1}`;
+                pEl.id = `pion-${i}`;
+                document.getElementById('board-container').appendChild(pEl);
+                updatePion(i);
             }
+            updateTurnUI();
         }
 
-        async function rollDice() {
-            document.getElementById('btn-roll').disabled = true;
-            let roll = Math.floor(Math.random() * 6) + 1;
-            document.getElementById('dice-icon').innerText = ['⚀','⚁','⚂','⚃','⚄','⚅'][roll-1];
+        function updatePion(idx) {
+            const p = players[idx];
+            const cell = document.querySelector(`[data-id="${p.pos}"]`);
+            const rect = cell.getBoundingClientRect();
+            const boardRect = document.getElementById('board-container').getBoundingClientRect();
+            const el = document.getElementById(`pion-${idx}`);
+            
+            el.style.left = (rect.left - boardRect.left + 40 + (idx * 5)) + 'px';
+            el.style.top = (rect.top - boardRect.top + 40) + 'px';
+        }
+
+        function updateTurnUI() {
+            const info = document.getElementById('turn-info');
+            info.innerText = `Giliran Pemain ${currentPlayer + 1}`;
+            info.style.backgroundColor = players[currentPlayer].color;
+        }
+
+        function rollDice() {
+            const roll = Math.floor(Math.random() * 6) + 1;
+            document.getElementById('dice').innerText = roll;
             
             let p = players[currentPlayer];
-            for(let i=0; i<roll; i++) {
-                if(p.pos < 100) {
-                    p.pos++;
-                    moveVisual(currentPlayer, p.pos);
-                    sounds.move.play();
-                    await new Promise(r => setTimeout(r, 300));
-                }
-            }
-            showQuiz();
+            p.pos += roll;
+            if (p.pos > 30) p.pos = 30;
+            
+            updatePion(currentPlayer);
+            
+            setTimeout(() => showQuiz(), 600);
         }
 
         function showQuiz() {
+            const q = questions[Math.floor(Math.random() * questions.length)];
             const modal = document.getElementById('quiz-modal');
-            const qData = questions[Math.floor(Math.random() * questions.length)];
-            const container = document.getElementById('ans-container');
-            const inputContainer = document.getElementById('input-box');
+            const qText = document.getElementById('q-text');
+            const options = document.getElementById('options');
             
-            document.getElementById('quiz-q').innerText = qData.q;
-            container.innerHTML = '';
-            inputContainer.style.display = 'none';
-            document.getElementById('quiz-story').style.display = 'none';
-
-            if(qData.type === 'pg' || qData.type === 'baca') {
-                if(qData.story) {
-                    document.getElementById('quiz-story').innerText = qData.story;
-                    document.getElementById('quiz-story').style.display = 'block';
-                }
-                ['a','b'].forEach(opt => {
-                    let btn = document.createElement('button');
-                    btn.className = 'ans-btn';
-                    btn.innerText = qData[opt];
-                    btn.onclick = () => checkAns(opt === qData.correct);
-                    container.appendChild(btn);
-                });
-            } else if(qData.type === 'bs') {
-                ['B','S'].forEach(opt => {
-                    let btn = document.createElement('button');
-                    btn.className = 'ans-btn';
-                    btn.innerText = opt;
-                    btn.onclick = () => checkAns(opt === qData.correct);
-                    container.appendChild(btn);
-                });
-            } else {
-                inputContainer.style.display = 'block';
-                document.getElementById('btn-submit-input').onclick = () => {
-                    checkAns(document.getElementById('raw-input').value === qData.correct);
-                };
-            }
+            qText.innerText = q.q;
+            options.innerHTML = '';
+            
+            q.a.forEach((opt, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(i, q.c, btn);
+                options.appendChild(btn);
+            });
+            
             modal.style.display = 'flex';
         }
 
-        function checkAns(isCorrect) {
-            if(isCorrect) {
-                sounds.correct.play();
-                players[currentPlayer].score += 10;
-                alert("Benar! +10 Poin");
+        function checkAnswer(chosen, correct, btn) {
+            const ting = document.getElementById('snd-ting');
+            const tetot = document.getElementById('snd-tetot');
+            
+            if (chosen === correct) {
+                ting.play();
+                btn.classList.add('correct');
+                // Cek Ular/Tangga
+                if (links[players[currentPlayer].pos]) {
+                    players[currentPlayer].pos = links[players[currentPlayer].pos];
+                }
             } else {
-                sounds.wrong.play();
-                alert("Salah! 0 Poin");
-            }
-            
-            document.getElementById('quiz-modal').style.display = 'none';
-            document.getElementById('raw-input').value = '';
-
-            // Cek Ular/Tangga jika benar
-            if(isCorrect && snakesLadders[players[currentPlayer].pos]) {
-                players[currentPlayer].pos = snakesLadders[players[currentPlayer].pos];
-                moveVisual(currentPlayer, players[currentPlayer].pos);
-                sounds.win.play(); // Suara kemenangan singkat saat naik/selamat
+                tetot.play();
+                btn.classList.add('wrong');
+                // Penalti: Mundur 2 langkah jika salah
+                players[currentPlayer].pos = Math.max(1, players[currentPlayer].pos - 2);
             }
 
-            if(players[currentPlayer].pos >= 100) {
-                alert("Selamat! " + (currentPlayer+1) + " Menang!");
-                location.reload();
-            } else {
-                currentPlayer = (currentPlayer + 1) % 5;
-                updateUI();
-                document.getElementById('btn-roll').disabled = false;
-            }
+            setTimeout(() => {
+                document.getElementById('quiz-modal').style.display = 'none';
+                updatePion(currentPlayer);
+                if (players[currentPlayer].pos >= 30) {
+                    alert(`Pemain ${currentPlayer + 1} MENANG!`);
+                    location.reload();
+                } else {
+                    currentPlayer = (currentPlayer + 1) % 5;
+                    updateTurnUI();
+                }
+            }, 1000);
         }
 
-        function moveVisual(pIdx, pos) {
-            const cell = document.getElementById(`cell-${pos}`);
-            const pion = document.getElementById(`pion-${pIdx}`);
-            const rect = cell.getBoundingClientRect();
-            const boardRect = document.getElementById('board-container').getBoundingClientRect();
-            
-            pion.style.left = (rect.left - boardRect.left + (pIdx * 5)) + 'px';
-            pion.style.top = (rect.top - boardRect.top + 5) + 'px';
-        }
-
-        function updateUI() {
-            document.getElementById('info-turn').innerText = `Giliran Pemain ${currentPlayer + 1}`;
-            document.getElementById('info-turn').style.color = colors[currentPlayer];
-            
-            let html = '';
-            players.forEach(p => {
-                html += `<div style="color:${p.color}">Pemain ${p.id+1}: ${p.score} pt (Pos: ${p.pos})</div>`;
-            });
-            document.getElementById('score-list').innerHTML = html;
-        }
-
-        document.getElementById('btn-roll').onclick = rollDice;
-        window.onload = initBoard;
-
+        createBoard();
     </script>
 </body>
 </html>
