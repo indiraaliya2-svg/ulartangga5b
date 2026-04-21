@@ -1,326 +1,423 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ular Tangga Golongan Hewan</title>
-    <style>
-        :root {
-            --wood-dark: #8D6E63;
-            --forest-green: #2E7D32;
-            --sky-blue: #81D4FA;
-            --correct-sound: #4CAF50;
-            --wrong-sound: #F44336;
-        }
-
-        body {
-            font-family: 'Arial Round', 'Trebuchet MS', sans-serif;
-            background: linear-gradient(to bottom, #81D4FA, #C8E6C9);
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        #game-wrapper {
-            background: url('https://img.freepik.com/free-vector/nature-forest-landscape-background_1308-72530.jpg?size=626&ext=jpg') no-repeat center center;
-            background-size: cover;
-            padding: 40px;
-            border-radius: 30px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-            border: 10px solid var(--wood-dark);
-            position: relative;
-        }
-
-        /* PAPAN PERMAINAN 1-50 */
-        #board-container {
-            display: grid;
-            grid-template-columns: repeat(10, 60px);
-            grid-template-rows: repeat(5, 60px);
-            gap: 2px;
-            background: rgba(255,255,255,0.2);
-            padding: 10px;
-            border-radius: 10px;
-            position: relative;
-        }
-
-        .cell {
-            width: 60px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 1.2em;
-            color: white;
-            text-shadow: 1px 1px 2px black;
-            border-radius: 8px;
-            position: relative;
-        }
-
-        /* Warna sel selang-seling seperti gambar */
-        .cell:nth-child(odd) { background-color: #FFB74D; }
-        .cell:nth-child(even) { background-color: #4FC3F7; }
-
-        /* SVG Overlay untuk Ular & Tangga */
-        #svg-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none;
-            z-index: 5;
-        }
-
-        .pion {
-            width: 35px;
-            height: 35px;
-            position: absolute;
-            z-index: 10;
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.5));
-        }
-
-        /* PANEL KONTROL */
-        #side-panel {
-            margin-top: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(255,255,255,0.8);
-            padding: 15px;
-            border-radius: 15px;
-        }
-
-        #dice-box {
-            width: 80px; height: 80px;
-            background: white;
-            border: 4px solid var(--wood-dark);
-            border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 2.5em; cursor: pointer;
-        }
-
-        /* MODAL KUIS (Gaya Pop-up Gambar) */
-        #quiz-modal {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85);
-            display: none;
-            justify-content: center; align-items: center;
-            z-index: 100;
-        }
-
-        #quiz-content {
-            background: #FFF9C4;
-            padding: 30px;
-            border-radius: 25px;
-            text-align: center;
-            max-width: 500px;
-            border: 8px solid #FBC02D;
-        }
-
-        .animal-img {
-            width: 200px; height: 150px;
-            border-radius: 15px;
-            object-fit: cover;
-            margin-bottom: 15px;
-            border: 4px solid white;
-        }
-
-        .opt-btn {
-            display: inline-block;
-            margin: 10px;
-            padding: 12px 25px;
-            font-size: 1em;
-            font-weight: bold;
-            text-transform: uppercase;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            color: white;
-            transition: transform 0.2s;
-        }
-
-        .opt-btn:hover { transform: scale(1.1); }
-        .btn-herbivora { background-color: #4CAF50; }
-        .btn-karnivora { background-color: #F44336; }
-        .btn-omnivora { background-color: #2196F3; }
-
-    </style>
-</head>
-<body>
-
-<div id="game-wrapper">
-    <div id="board-container" id="board">
-        <svg id="svg-overlay"></svg>
+<!doctype html>
+<html lang="id" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ular Tangga Edukatif SD</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&amp;family=Nunito:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+  <style>
+html,body{margin:0;padding:0;height:100%;width:100%;overflow:auto;font-family:'Nunito',sans-serif}
+.game-wrap{width:100%;min-height:100%;background:linear-gradient(135deg,#ffecd2 0%,#fcb69f 50%,#ff9a9e 100%)}
+h1,h2,h3,.fredoka{font-family:'Fredoka One',cursive}
+.board-cell{position:relative;width:100%;aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:clamp(10px,1.8vw,18px);transition:all .2s;cursor:default;border:2px solid rgba(255,255,255,.4);box-shadow:inset 0 -2px 4px rgba(0,0,0,.1)}
+.board-cell:hover{transform:scale(1.05);z-index:2}
+.cell-snake{background:linear-gradient(135deg,#ff6b6b,#ee5a24)!important;color:#fff}
+.cell-ladder{background:linear-gradient(135deg,#2ecc71,#27ae60)!important;color:#fff}
+.cell-start{background:linear-gradient(135deg,#f9ca24,#f0932b)!important;color:#fff}
+.cell-finish{background:linear-gradient(135deg,#6c5ce7,#a29bfe)!important;color:#fff;animation:pulse-finish 1.5s infinite}
+@keyframes pulse-finish{0%,100%{box-shadow:0 0 0 0 rgba(108,92,231,.5)}50%{box-shadow:0 0 0 8px rgba(108,92,231,0)}}
+.pion{width:clamp(14px,2vw,24px);height:clamp(14px,2vw,24px);border-radius:50%;position:absolute;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3);transition:all .3s ease;z-index:10;display:flex;align-items:center;justify-content:center;font-size:clamp(8px,1vw,12px)}
+.pion.active-pion{animation:bounce-pion .5s infinite}
+@keyframes bounce-pion{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.dice-container{width:80px;height:80px;perspective:600px;margin:0 auto}
+.dice{width:80px;height:80px;background:#fff;border-radius:14px;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:36px;color:#e74c3c;box-shadow:0 6px 20px rgba(0,0,0,.2);cursor:pointer;transition:transform .1s;user-select:none}
+.dice:hover{transform:scale(1.05)}
+.dice:active{transform:scale(.95)}
+.dice.rolling{animation:roll-dice .6s ease-out}
+@keyframes roll-dice{0%{transform:rotateX(0) rotateY(0) scale(1)}25%{transform:rotateX(180deg) rotateY(90deg) scale(.8)}50%{transform:rotateX(360deg) rotateY(180deg) scale(1.1)}75%{transform:rotateX(540deg) rotateY(270deg) scale(.9)}100%{transform:rotateX(720deg) rotateY(360deg) scale(1)}}
+.score-card{background:rgba(255,255,255,.9);border-radius:12px;padding:8px 12px;display:flex;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(0,0,0,.1);transition:all .3s}
+.score-card.active-player{transform:scale(1.05);box-shadow:0 4px 16px rgba(0,0,0,.2);border:2px solid currentColor}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:100;opacity:0;pointer-events:none;transition:opacity .3s}
+.modal-overlay.show{opacity:1;pointer-events:all}
+.modal-box{background:#fff;border-radius:20px;padding:24px;max-width:420px;width:90%;text-align:center;transform:scale(.8);transition:transform .3s;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.modal-overlay.show .modal-box{transform:scale(1)}
+.btn-answer{padding:10px 16px;border-radius:12px;font-weight:700;font-size:15px;border:3px solid #ddd;background:#fff;cursor:pointer;transition:all .2s;width:100%;text-align:left}
+.btn-answer:hover{border-color:#3498db;background:#ebf5fb}
+.btn-answer.correct{border-color:#2ecc71;background:#d5f5e3;animation:pop .3s}
+.btn-answer.wrong{border-color:#e74c3c;background:#fadbd8;animation:shake .4s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+@keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.05)}100%{transform:scale(1)}}
+.stars{position:fixed;pointer-events:none;z-index:200}
+.star-particle{position:absolute;font-size:24px;animation:star-fly 1s ease-out forwards}
+@keyframes star-fly{0%{opacity:1;transform:translate(0,0) scale(1) rotate(0)}100%{opacity:0;transform:translate(var(--tx),var(--ty)) scale(0) rotate(360deg)}}
+.snake-icon,.ladder-icon{font-size:clamp(10px,1.4vw,16px);position:absolute;bottom:1px;right:2px}
+.input-answer{width:100%;padding:10px 14px;border:3px solid #ddd;border-radius:12px;font-size:16px;font-family:'Nunito',sans-serif;font-weight:600;outline:none;transition:border-color .2s}
+.input-answer:focus{border-color:#3498db}
+.reading-box{background:#f0f7ff;border-radius:12px;padding:12px;margin-bottom:12px;text-align:left;font-size:14px;line-height:1.6;border-left:4px solid #3498db}
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);padding:12px 24px;border-radius:12px;font-weight:700;font-size:16px;z-index:300;opacity:0;transition:all .4s;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.arrow-svg{position:absolute;z-index:5;pointer-events:none}
+</style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full">
+  <div class="game-wrap" id="gameWrap"><!-- TITLE -->
+   <div class="text-center pt-4 pb-2 px-4">
+    <h1 id="gameTitle" class="text-2xl md:text-4xl text-white drop-shadow-lg" style="text-shadow:2px 2px 0 #e74c3c,4px 4px 0 rgba(0,0,0,.15)">🎮 Ular Tangga Edukatif 🎮</h1>
+    <p class="text-white font-bold text-sm mt-1 opacity-80">Belajar sambil bermain untuk siswa SD!</p>
+   </div><!-- MAIN LAYOUT -->
+   <div class="flex flex-col lg:flex-row gap-4 px-4 pb-4 max-w-7xl mx-auto"><!-- LEFT: Board -->
+    <div class="flex-1 min-w-0">
+     <div class="relative">
+      <div id="board" class="grid grid-cols-6 gap-1 p-3 bg-white/30 rounded-2xl backdrop-blur-sm" style="max-width:560px;margin:0 auto"></div>
+      <svg id="arrowsSvg" class="absolute inset-0 w-full h-full pointer-events-none" style="z-index:5"></svg>
+     </div>
+    </div><!-- RIGHT: Controls -->
+    <div class="lg:w-72 flex flex-col gap-3"><!-- Dice -->
+     <div class="bg-white/80 rounded-2xl p-4 text-center backdrop-blur-sm shadow-lg">
+      <p id="turnLabel" class="fredoka text-lg mb-2">Giliran: Pemain 1</p>
+      <div class="dice-container">
+       <div class="dice" id="diceBtn" onclick="rollDice()">
+        🎲
+       </div>
+      </div>
+      <p id="diceResult" class="mt-2 font-bold text-gray-500 text-sm">Klik dadu untuk mulai!</p>
+     </div><!-- Scores -->
+     <div class="bg-white/80 rounded-2xl p-3 backdrop-blur-sm shadow-lg">
+      <h3 class="fredoka text-center mb-2 text-gray-700">⭐ Skor</h3>
+      <div id="scoreBoard" class="flex flex-col gap-2"></div>
+     </div><!-- Sound Toggle --> <button onclick="toggleSound()" id="soundBtn" class="bg-white/80 rounded-xl p-2 text-center font-bold text-sm shadow hover:bg-white transition">🔊 Musik: ON</button>
     </div>
+   </div>
+  </div><!-- Question Modal -->
+  <div class="modal-overlay" id="questionModal">
+   <div class="modal-box" id="questionBox"></div>
+  </div><!-- Finish Modal -->
+  <div class="modal-overlay" id="finishModal">
+   <div class="modal-box">
+    <h2 class="fredoka text-3xl mb-4">🏁 Permainan Selesai!</h2>
+    <div id="finalScores"></div><button onclick="restartGame()" class="mt-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white fredoka text-xl px-8 py-3 rounded-2xl shadow-lg hover:scale-105 transition">🔄 Main Lagi!</button>
+   </div>
+  </div><!-- Toast -->
+  <div class="toast" id="toast"></div><!-- Stars container -->
+  <div class="stars" id="starsContainer"></div>
+  <script>
+// ===== AUDIO via Web Audio API =====
+const audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+let soundOn=true;
+function playTone(freq,dur,type='sine',vol=.15){
+if(!soundOn)return;
+try{audioCtx.resume()}catch(e){}
+const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+o.type=type;o.frequency.value=freq;g.gain.value=vol;
+o.connect(g);g.connect(audioCtx.destination);
+o.start();g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+dur);
+o.stop(audioCtx.currentTime+dur);
+}
+function sfxDice(){playTone(300,.08,'square',.1);setTimeout(()=>playTone(400,.08,'square',.1),80);setTimeout(()=>playTone(500,.08,'square',.1),160)}
+function sfxStep(){playTone(600,.06,'sine',.08)}
+function sfxCorrect(){playTone(523,.1,'sine',.12);setTimeout(()=>playTone(659,.1,'sine',.12),100);setTimeout(()=>playTone(784,.2,'sine',.12),200)}
+function sfxWrong(){playTone(200,.15,'sawtooth',.1);setTimeout(()=>playTone(150,.2,'sawtooth',.1),150)}
+function sfxLadder(){[523,587,659,698,784].forEach((f,i)=>setTimeout(()=>playTone(f,.12,'sine',.1),i*80))}
+function sfxSnake(){[784,698,659,587,523,440].forEach((f,i)=>setTimeout(()=>playTone(f,.1,'sawtooth',.08),i*70))}
+function sfxFinish(){const notes=[523,659,784,1047];notes.forEach((f,i)=>setTimeout(()=>playTone(f,.3,'sine',.15),i*150));setTimeout(()=>{[1047,1175,1319].forEach((f,i)=>setTimeout(()=>playTone(f,.4,'sine',.12),i*120))},700)}
 
-    <div id="side-panel">
-        <div style="text-align: center;">
-            <p id="player-label" style="font-weight: bold; margin-top: 0;">Giliran: Pemain 1</p>
-            <div id="dice-box" onclick="rollDice()">🎲</div>
-        </div>
-        <div id="avatar-display">
-            <img src="https://cdn-icons-png.flaticon.com/512/4333/4333609.png" width="80" alt="avatar">
-        </div>
-    </div>
-</div>
+// Background music
+let bgInterval=null;
+function startBgMusic(){
+if(bgInterval)return;
+const melody=[392,440,494,523,494,440,392,349,330,349,392,440,392,330,294,330];
+let idx=0;
+bgInterval=setInterval(()=>{
+if(!soundOn)return;
+playTone(melody[idx%melody.length],.2,'triangle',.04);
+idx++;
+},350);
+}
+function stopBgMusic(){clearInterval(bgInterval);bgInterval=null}
+function toggleSound(){
+soundOn=!soundOn;
+document.getElementById('soundBtn').textContent=soundOn?'🔊 Musik: ON':'🔇 Musik: OFF';
+if(soundOn)startBgMusic();else stopBgMusic();
+}
 
-<!-- Modal Kuis -->
-<div id="quiz-modal">
-    <div id="quiz-content">
-        <h2 id="q-title">Pertanyaan!</h2>
-        <img id="q-image" class="animal-img" src="" alt="animal">
-        <p id="q-text" style="font-size: 1.2em; font-weight: bold;"></p>
-        <div id="options">
-            <button class="opt-btn btn-herbivora" onclick="answer('Herbivora')">Herbivora</button>
-            <button class="opt-btn btn-karnivora" onclick="answer('Karnivora')">Karnivora</button>
-            <button class="opt-btn btn-omnivora" onclick="answer('Omnivora')">Omnivora</button>
-        </div>
-    </div>
-</div>
+// ===== GAME CONFIG =====
+const TOTAL=30, PLAYERS=5;
+const COLORS=['#e74c3c','#3498db','#f39c12','#2ecc71','#9b59b6'];
+const NAMES=['Merah','Biru','Kuning','Hijau','Ungu'];
+const EMOJIS=['🦊','🐬','🌟','🐸','🦄'];
 
-<!-- Sound Effects -->
-<audio id="sfx-correct" src="https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3"></audio>
-<audio id="sfx-wrong" src="https://assets.mixkit.co/active_storage/sfx/2955/2955-preview.mp3"></audio>
-<audio id="sfx-slide" src="https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3"></audio>
+// Snakes & Ladders
+const SNAKES={27:8, 21:4, 17:3, 24:14};
+const LADDERS={2:12, 6:16, 11:22, 15:25};
 
-<script>
-    const totalCells = 50;
-    const cols = 10;
-    let playerPos = 1;
+// Cell colors
+const CELL_COLORS=['#ffeaa7','#dfe6e9','#fdcb6e','#81ecec','#fab1a0','#74b9ff','#a29bfe','#55efc4','#ff7675','#fd79a8'];
 
-    // Data Ular & Tangga {dari: ke}
-    const links = {
-        3: 17, 10: 12, 18: 38, // Tangga
-        15: 5, 24: 1, 48: 32   // Ular
-    };
+// ===== QUESTIONS BANK =====
+const mcQuestions=[
+{q:"Berat semangka itu …",opts:["delapan kilogram","8 kilogram"],ans:1},
+{q:"Harga buku tulis itu …",opts:["Rp5.000,00","lima ribu rupiah"],ans:0},
+{q:"Alamat rumah Siti di …",opts:["Jalan Mawar nomor sembilan","Jalan Mawar No. 9"],ans:1},
+{q:"Panjang meja itu …",opts:["dua meter","2 meter"],ans:1},
+{q:"Dana pembangunan taman sebesar …",opts:["300 juta rupiah","tiga ratus juta rupiah"],ans:0},
+];
+const tfQuestions=[
+{q:"Rp15.000,00 — penulisan ini benar?",ans:true},
+{q:"Jalan Anggrek No. 10 — penulisan ini benar?",ans:true},
+{q:"'lima meter' adalah penulisan angka yang benar?",ans:false},
+{q:"12 kilogram — penulisan ini benar?",ans:true},
+{q:"'dua belas ribu rupiah' adalah penulisan angka yang benar?",ans:false},
+];
+const fillQuestions=[
+{q:"Ibu membeli gula ___ kilogram",ans:"2"},
+{q:"Harga gula tersebut ___",ans:"Rp10.000,00"},
+{q:"Rumah ibu di Jalan Kenanga No. ___",ans:"7"},
+];
+const readingText=`"Siti akan pergi ke Bandung untuk mengunjungi neneknya. Ia berangkat naik kereta pukul 08.00 pagi dari Stasiun Jakarta. Kereta tiba di Bandung pukul 11.00 siang."`;
+const readingQuestions=[
+{q:"Apa tujuan perjalanan Siti?",opts:["Liburan ke pantai","Mengunjungi neneknya"],ans:1},
+{q:"Siti berangkat pukul …",opts:["08.00","11.00"],ans:0},
+{q:"Siti naik apa?",opts:["Bus","Kereta"],ans:1},
+{q:"Berapa lama perjalanan Siti?",opts:["3 jam","2 jam"],ans:0},
+{q:"Siti berangkat dari mana?",opts:["Bandung","Jakarta"],ans:1},
+];
 
-    // Bank Soal Hewan
-    const questions = [
-        { name: "Sapi", type: "Herbivora", img: "https://t3.ftcdn.net/jpg/02/10/73/04/360_F_210730419_3SNoK3mY3A932Ea88T0C9oF79yXzX5N9.jpg" },
-        { name: "Harimau", type: "Karnivora", img: "https://images.unsplash.com/photo-1508249400262-10878544e331?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=60" },
-        { name: "Monyet", type: "Omnivora", img: "https://images.unsplash.com/photo-1540573133985-87b6da6d54a9?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=60" },
-        { name: "Singa", type: "Karnivora", img: "https://images.unsplash.com/photo-1546182990-dffeafbe841d?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=60" },
-        { name: "Kelinci", type: "Herbivora", img: "https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=60" }
-    ];
+let allQuestions=[];
+function buildQuestionPool(){
+allQuestions=[];
+mcQuestions.forEach(q=>allQuestions.push({type:'mc',...q}));
+tfQuestions.forEach(q=>allQuestions.push({type:'tf',...q}));
+fillQuestions.forEach(q=>allQuestions.push({type:'fill',...q}));
+readingQuestions.forEach(q=>allQuestions.push({type:'reading',...q}));
+shuffle(allQuestions);
+}
+let qIdx=0;
+function getNextQuestion(){
+if(qIdx>=allQuestions.length){shuffle(allQuestions);qIdx=0}
+return allQuestions[qIdx++];
+}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}}
 
-    let currentQ = {};
+// ===== GAME STATE =====
+let positions=Array(PLAYERS).fill(0); // 0=not started, 1-30=on board
+let scores=Array(PLAYERS).fill(0);
+let currentPlayer=0;
+let isRolling=false;
+let gameOver=false;
 
-    function createBoard() {
-        const board = document.getElementById('board-container');
-        // Membuat urutan angka berkelok (boustrophedon)
-        for (let row = 4; row >= 0; row--) {
-            for (let col = 0; col < 10; col++) {
-                let cellId;
-                if (row % 2 === 0) {
-                    cellId = (row * 10) + (col + 1);
-                } else {
-                    cellId = (row * 10) + (10 - col);
-                }
-                
-                const cell = document.createElement('div');
-                cell.className = 'cell';
-                cell.id = `cell-${cellId}`;
-                cell.innerText = cellId;
-                board.appendChild(cell);
-            }
-        }
-        
-        // Tambah Pion
-        const pion = document.createElement('img');
-        pion.id = 'player-pion';
-        pion.className = 'pion';
-        pion.src = 'https://cdn-icons-png.flaticon.com/512/4333/4333609.png';
-        document.getElementById('board-container').appendChild(pion);
-        updatePionPosition();
-        drawLines();
-    }
+// ===== BUILD BOARD =====
+function buildBoard(){
+const board=document.getElementById('board');
+board.innerHTML='';
+// Board layout: row 0(top) is cells 25-30, row 4(bottom) is cells 1-6
+// Zigzag: even rows(from bottom) L->R, odd rows R->L
+const cells=[];
+for(let row=4;row>=0;row--){
+const rowCells=[];
+const startNum=row*6; // 0-based row from bottom
+for(let col=0;col<6;col++){
+const fromBottom=4-row;
+let num;
+if(fromBottom%2===0) num=fromBottom*6+col+1;
+else num=fromBottom*6+(5-col)+1;
+rowCells.push(num);
+}
+cells.push(...rowCells);
+}
+cells.forEach(num=>{
+const div=document.createElement('div');
+div.className='board-cell';
+div.id='cell-'+num;
+div.dataset.num=num;
+let bg=CELL_COLORS[(num-1)%CELL_COLORS.length];
+if(num===1){div.classList.add('cell-start');bg=''}
+else if(num===30){div.classList.add('cell-finish');bg=''}
+else if(SNAKES[num]){div.classList.add('cell-snake');bg=''}
+else if(LADDERS[num]){div.classList.add('cell-ladder');bg=''}
+if(bg)div.style.background=bg;
+div.innerHTML=`<span>${num}</span>`;
+if(SNAKES[num])div.innerHTML+=`<span class="snake-icon">🐍</span>`;
+if(LADDERS[num])div.innerHTML+=`<span class="ladder-icon">🪜</span>`;
+board.appendChild(div);
+});
+}
 
-    function updatePionPosition() {
-        const cell = document.getElementById(`cell-${playerPos}`);
-        const pion = document.getElementById('player-pion');
-        const boardRect = document.getElementById('board-container').getBoundingClientRect();
-        const cellRect = cell.getBoundingClientRect();
+function buildScoreBoard(){
+const sb=document.getElementById('scoreBoard');
+sb.innerHTML='';
+for(let i=0;i<PLAYERS;i++){
+const div=document.createElement('div');
+div.className='score-card';
+div.id='score-'+i;
+div.style.borderColor=COLORS[i];
+div.innerHTML=`<span style="font-size:20px">${EMOJIS[i]}</span>
+<span class="font-bold" style="color:${COLORS[i]}">${NAMES[i]}</span>
+<span class="ml-auto font-extrabold" id="pts-${i}">0</span>⭐`;
+sb.appendChild(div);
+}
+updateActivePlayer();
+}
 
-        pion.style.left = (cellRect.left - boardRect.left + 12) + 'px';
-        pion.style.top = (cellRect.top - boardRect.top + 12) + 'px';
-    }
+function updateActivePlayer(){
+for(let i=0;i<PLAYERS;i++){
+const el=document.getElementById('score-'+i);
+el.classList.toggle('active-player',i===currentPlayer);
+if(i===currentPlayer)el.style.borderColor=COLORS[i];
+}
+document.getElementById('turnLabel').textContent=`Giliran: ${EMOJIS[currentPlayer]} ${NAMES[currentPlayer]}`;
+document.getElementById('turnLabel').style.color=COLORS[currentPlayer];
+}
 
-    function rollDice() {
-        const roll = Math.floor(Math.random() * 6) + 1;
-        document.getElementById('dice-box').innerText = roll;
-        
-        playerPos += roll;
-        if (playerPos > 50) playerPos = 50;
-        
-        updatePionPosition();
-        setTimeout(triggerQuiz, 600);
-    }
+// ===== PION RENDERING =====
+function renderPions(){
+// Remove old pions
+document.querySelectorAll('.pion').forEach(p=>p.remove());
+// Group by position
+const groups={};
+positions.forEach((pos,i)=>{
+if(pos<1)return;
+if(!groups[pos])groups[pos]=[];
+groups[pos].push(i);
+});
+Object.entries(groups).forEach(([pos,players])=>{
+const cell=document.getElementById('cell-'+pos);
+if(!cell)return;
+players.forEach((pi,idx)=>{
+const pion=document.createElement('div');
+pion.className='pion';
+if(pi===currentPlayer&&!gameOver)pion.classList.add('active-pion');
+pion.style.background=COLORS[pi];
+pion.textContent=EMOJIS[pi];
+// Offset multiple pions
+const offsets=[[-30,-30],[-30,30],[30,-30],[30,30],[0,0]];
+const ox=players.length>1?offsets[idx][0]*0.3:0;
+const oy=players.length>1?offsets[idx][1]*0.3:0;
+pion.style.transform=`translate(${ox}px,${oy}px)`;
+cell.appendChild(pion);
+});
+});
+}
 
-    function triggerQuiz() {
-        currentQ = questions[Math.floor(Math.random() * questions.length)];
-        document.getElementById('q-image').src = currentQ.img;
-        document.getElementById('q-text').innerText = `${currentQ.name} termasuk golongan hewan apa?`;
-        document.getElementById('quiz-modal').style.display = 'flex';
-    }
+// ===== DICE =====
+async function rollDice(){
+if(isRolling||gameOver)return;
+isRolling=true;
+try{audioCtx.resume()}catch(e){}
+if(!bgInterval)startBgMusic();
+const dice=document.getElementById('diceBtn');
+sfxDice();
+dice.classList.add('rolling');
+const value=Math.floor(Math.random()*6)+1;
+const faces=['⚀','⚁','⚂','⚃','⚄','⚅'];
+await wait(600);
+dice.classList.remove('rolling');
+dice.textContent=faces[value-1];
+document.getElementById('diceResult').textContent=`🎲 Angka: ${value}`;
 
-    function answer(choice) {
-        const modal = document.getElementById('quiz-modal');
-        const sfxCorrect = document.getElementById('sfx-correct');
-        const sfxWrong = document.getElementById('sfx-wrong');
-        const sfxSlide = document.getElementById('sfx-slide');
+// Move pion
+let pos=positions[currentPlayer];
+if(pos===0)pos=0;
+let target=pos+value;
+if(target>30)target=30; // can't go past
 
-        if (choice === currentQ.type) {
-            sfxCorrect.play();
-            alert("BENAR! Lanjut bermain.");
-            
-            // Cek Ular atau Tangga
-            if (links[playerPos]) {
-                setTimeout(() => {
-                    sfxSlide.play();
-                    playerPos = links[playerPos];
-                    updatePionPosition();
-                }, 500);
-            }
-        } else {
-            sfxWrong.play();
-            alert(`SALAH! ${currentQ.name} adalah ${currentQ.type}. Kamu mundur 2 kotak.`);
-            playerPos = Math.max(1, playerPos - 2);
-            updatePionPosition();
-        }
+// Animate step by step
+for(let step=pos+1;step<=target;step++){
+positions[currentPlayer]=step;
+renderPions();
+sfxStep();
+await wait(250);
+}
 
-        modal.style.display = 'none';
-        if (playerPos >= 50) {
-            alert("SELAMAT! Kamu Menang!");
-            playerPos = 1;
-            updatePionPosition();
-        }
-    }
+// Show question
+await showQuestion(target);
+}
 
-    // Menggambar garis ular/tangga (Sederhana)
-    function drawLines() {
-        const svg = document.getElementById('svg-overlay');
-        const board = document.getElementById('board-container').getBoundingClientRect();
-        
-        Object.entries(links).forEach(([start, end]) => {
-            const startCell = document.getElementById(`cell-${start}`).getBoundingClientRect();
-            const endCell = document.getElementById(`cell-${end}`).getBoundingClientRect();
-            
-            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-            line.setAttribute("x1", startCell.left - board.left + 30);
-            line.setAttribute("y1", startCell.top - board.top + 30);
-            line.setAttribute("x2", endCell.left - board.left + 30);
-            line.setAttribute("y2", endCell.top - board.top + 30);
-            line.setAttribute("stroke", (end > start) ? "rgba(76, 175, 80, 0.6)" : "rgba(244, 67, 54, 0.6)");
-            line.setAttribute("stroke-width", "8");
-            line.setAttribute("stroke-linecap", "round");
-            svg.appendChild(line);
-        });
-    }
+async function showQuestion(landedPos){
+const q=getNextQuestion();
+const modal=document.getElementById('questionModal');
+const box=document.getElementById('questionBox');
 
-    window.onload = createBoard;
-</script>
+let html=`<p class="text-sm font-bold mb-1" style="color:${COLORS[currentPlayer]}">${EMOJIS[currentPlayer]} ${NAMES[currentPlayer]} — Kotak ${landedPos}</p>`;
 
-</body>
-</html>
+if(q.type==='mc'){
+html+=`<h3 class="fredoka text-lg mb-3">${q.q}</h3><div class="flex flex-col gap-2">`;
+const shuffled=[0,1];if(Math.random()>.5)shuffled.reverse();
+shuffled.forEach(i=>{
+html+=`<button class="btn-answer" onclick="answerMC(this,${i},${q.ans},${landedPos})">${String.fromCharCode(97+i)}) ${q.opts[i]}</button>`;
+});
+html+=`</div>`;
+} else if(q.type==='tf'){
+html+=`<h3 class="fredoka text-lg mb-3">${q.q}</h3><div class="flex gap-3 justify-center">`;
+html+=`<button class="btn-answer" style="width:auto;padding:10px 30px;text-align:center" onclick="answerTF(this,true,${q.ans},${landedPos})">✅ Benar</button>`;
+html+=`<button class="btn-answer" style="width:auto;padding:10px 30px;text-align:center" onclick="answerTF(this,false,${q.ans},${landedPos})">❌ Salah</button>`;
+html+=`</div>`;
+} else if(q.type==='fill'){
+html+=`<h3 class="fredoka text-lg mb-3">${q.q}</h3>`;
+html+=`<input class="input-answer" id="fillInput" placeholder="Ketik jawaban..." onkeydown="if(event.key==='Enter')checkFill('${q.ans.replace(/'/g,"\\'")}',${landedPos})">`;
+html+=`<button class="btn-answer mt-2" style="text-align:center;background:#3498db;color:#fff;border-color:#3498db" onclick="checkFill('${q.ans.replace(/'/g,"\\'")}',${landedPos})">Jawab!</button>`;
+} else if(q.type==='reading'){
+html+=`<div class="reading-box">${readingText}</div>`;
+html+=`<h3 class="fredoka text-base mb-3">${q.q}</h3><div class="flex flex-col gap-2">`;
+const shuffled=[0,1];if(Math.random()>.5)shuffled.reverse();
+shuffled.forEach(i=>{
+html+=`<button class="btn-answer" onclick="answerMC(this,${i},${q.ans},${landedPos})">${String.fromCharCode(97+i)}) ${q.opts[i]}</button>`;
+});
+html+=`</div>`;
+}
+
+box.innerHTML=html;
+modal.classList.add('show');
+}
+
+function answerMC(el,chosen,correct,pos){
+const btns=el.parentElement.querySelectorAll('.btn-answer');
+btns.forEach(b=>b.onclick=null);
+if(chosen===correct){onCorrect(el,pos)}else{
+el.classList.add('wrong');
+btns.forEach(b=>{if(b!==el)b.classList.add('correct')});// show correct
+onWrong(pos);
+}
+}
+function answerTF(el,chosen,correct,pos){
+const btns=el.parentElement.querySelectorAll('.btn-answer');
+btns.forEach(b=>b.onclick=null);
+if(chosen===correct){onCorrect(el,pos)}else{
+el.classList.add('wrong');
+onWrong(pos);
+}
+}
+function checkFill(correct,pos){
+const input=document.getElementById('fillInput');
+if(!input)return;
+const val=input.value.trim();
+const btn=input.nextElementSibling;
+if(!btn)return;
+input.disabled=true;btn.onclick=null;
+if(val===correct){onCorrect(btn,pos)}else{
+btn.classList.add('wrong');
+input.style.borderColor='#e74c3c';
+showToast(`Jawaban benar: ${correct}`,'#e74c3c');
+onWrong(pos);
+}
+}
+
+async function onCorrect(el,pos){
+el.classList.add('correct');
+sfxCorrect();
+scores[currentPlayer]+=10;
+document.getElementById('pts-'+currentPlayer).textContent=scores[currentPlayer];
+spawnStars(el);
+showToast('✅ Benar! +10 poin','#2ecc71');
+await wait(1200);
+await checkSnakeLadder(pos);
+}
+async function onWrong(pos){
+sfxWrong();
+showToast('❌ Salah! 0 poin','#e74c3c');
+await wait(1200);
+await checkSnakeLadder(pos);
+}
+
+async function checkSnakeLadder(pos){
+document.getElementById('questionModal').classList.remove('show');
+if(LADDERS[pos]){
+showToast('🪜 Naik tangga!','#27ae60');
+sfxLadder();
+await wait(400);
+const target=LADDERS[pos];
+for(let s=po
