@@ -3,71 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Petualangan Ular Tangga 30 - Edukatif</title>
+    <title>Ular Tangga Golongan Hewan</title>
     <style>
         :root {
-            --primary-color: #4CAF50;
-            --secondary-color: #FF9800;
-            --bg-color: #E0F7FA;
-            --text-color: #333;
-            --correct-color: #8BC34A;
-            --wrong-color: #EF5350;
-            --p1-color: #f44336;
-            --p2-color: #2196F3;
-            --p3-color: #FFEB3B;
-            --p4-color: #9C27B0;
-            --p5-color: #FF5722;
+            --wood-dark: #8D6E63;
+            --forest-green: #2E7D32;
+            --sky-blue: #81D4FA;
+            --correct-sound: #4CAF50;
+            --wrong-sound: #F44336;
         }
 
         body {
-            font-family: 'Comic Sans MS', cursive, sans-serif;
-            background-color: var(--bg-color);
+            font-family: 'Arial Round', 'Trebuchet MS', sans-serif;
+            background: linear-gradient(to bottom, #81D4FA, #C8E6C9);
             margin: 0;
-            padding: 20px;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
+            min-height: 100vh;
         }
 
-        #game-container {
-            display: flex;
-            gap: 20px;
-            max-width: 1100px;
-            width: 100%;
-        }
-
-        /* PAPAN 30 KOTAK (6 Kolom x 5 Baris) */
-        #board-container {
+        #game-wrapper {
+            background: url('https://img.freepik.com/free-vector/nature-forest-landscape-background_1308-72530.jpg?size=626&ext=jpg') no-repeat center center;
+            background-size: cover;
+            padding: 40px;
+            border-radius: 30px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            border: 10px solid var(--wood-dark);
             position: relative;
-            width: 500px;
-            height: 420px;
-            background-color: white;
-            border: 8px solid #8D6E63;
-            border-radius: 15px;
+        }
+
+        /* PAPAN PERMAINAN 1-50 */
+        #board-container {
             display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            grid-template-rows: repeat(5, 1fr);
+            grid-template-columns: repeat(10, 60px);
+            grid-template-rows: repeat(5, 60px);
+            gap: 2px;
+            background: rgba(255,255,255,0.2);
+            padding: 10px;
+            border-radius: 10px;
+            position: relative;
         }
 
         .cell {
-            border: 1px solid #ddd;
+            width: 60px;
+            height: 60px;
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
             font-weight: bold;
+            font-size: 1.2em;
+            color: white;
+            text-shadow: 1px 1px 2px black;
+            border-radius: 8px;
+            position: relative;
         }
 
-        .cell-number {
-            position: absolute;
-            top: 2px;
-            left: 5px;
-            font-size: 0.8em;
-            color: #888;
-        }
+        /* Warna sel selang-seling seperti gambar */
+        .cell:nth-child(odd) { background-color: #FFB74D; }
+        .cell:nth-child(even) { background-color: #4FC3F7; }
 
-        /* SVG untuk Ular dan Tangga */
-        #snakes-ladders-svg {
+        /* SVG Overlay untuk Ular & Tangga */
+        #svg-overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none;
@@ -75,266 +72,255 @@
         }
 
         .pion {
-            width: 25px;
-            height: 25px;
-            border-radius: 50%;
-            border: 2px solid white;
+            width: 35px;
+            height: 35px;
             position: absolute;
             z-index: 10;
-            transition: all 0.4s ease;
-            transform: translate(-50%, -50%);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.5));
         }
 
-        .pion-1 { background-color: var(--p1-color); }
-        .pion-2 { background-color: var(--p2-color); }
-        .pion-3 { background-color: var(--p3-color); }
-        .pion-4 { background-color: var(--p4-color); }
-        .pion-5 { background-color: var(--p5-color); }
-
-        #control-panel {
-            flex: 1;
-            background: white;
-            padding: 20px;
+        /* PANEL KONTROL */
+        #side-panel {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,255,255,0.8);
+            padding: 15px;
             border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
 
-        #dice {
-            width: 60px; height: 60px;
-            border: 3px solid #333;
-            border-radius: 10px;
-            display: flex; justify-content: center; align-items: center;
-            font-size: 2em; margin: 10px auto;
+        #dice-box {
+            width: 80px; height: 80px;
+            background: white;
+            border: 4px solid var(--wood-dark);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2.5em; cursor: pointer;
         }
 
-        /* MODAL SOAL */
+        /* MODAL KUIS (Gaya Pop-up Gambar) */
         #quiz-modal {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.85);
             display: none;
             justify-content: center; align-items: center;
             z-index: 100;
         }
 
-        #quiz-container {
-            background: white; padding: 30px; border-radius: 20px;
-            text-align: center; max-width: 400px; width: 90%;
+        #quiz-content {
+            background: #FFF9C4;
+            padding: 30px;
+            border-radius: 25px;
+            text-align: center;
+            max-width: 500px;
+            border: 8px solid #FBC02D;
         }
 
-        .option-btn {
-            display: block; width: 100%; padding: 10px; margin: 5px 0;
-            cursor: pointer; border-radius: 10px; border: 1px solid #ccc;
+        .animal-img {
+            width: 200px; height: 150px;
+            border-radius: 15px;
+            object-fit: cover;
+            margin-bottom: 15px;
+            border: 4px solid white;
         }
-        
-        .correct { background-color: var(--correct-color) !important; color: white; }
-        .wrong { background-color: var(--wrong-color) !important; color: white; }
+
+        .opt-btn {
+            display: inline-block;
+            margin: 10px;
+            padding: 12px 25px;
+            font-size: 1em;
+            font-weight: bold;
+            text-transform: uppercase;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            color: white;
+            transition: transform 0.2s;
+        }
+
+        .opt-btn:hover { transform: scale(1.1); }
+        .btn-herbivora { background-color: #4CAF50; }
+        .btn-karnivora { background-color: #F44336; }
+        .btn-omnivora { background-color: #2196F3; }
+
     </style>
 </head>
 <body>
 
-    <h1>🐍 Ular Tangga Edukatif (1-30) 🪜</h1>
-
-    <div id="game-container">
-        <div id="board-container" id="board">
-            <svg id="snakes-ladders-svg"></svg>
-        </div>
-
-        <div id="control-panel">
-            <div id="setup">
-                <button id="start-btn" onclick="startGame()" style="padding: 15px 30px; font-size: 1.2em; cursor:pointer;">MULAI PERMAINAN</button>
-                <p>Klik mulai untuk mengaktifkan musik & suara!</p>
-            </div>
-
-            <div id="play-area" style="display:none;">
-                <div id="turn-info" style="padding:10px; text-align:center; color:white; font-weight:bold; border-radius:10px;">Pemain 1</div>
-                <div id="dice">?</div>
-                <button id="roll-btn" onclick="rollDice()" style="width:100%; padding:10px; cursor:pointer;">Lempar Dadu</button>
-            </div>
-        </div>
+<div id="game-wrapper">
+    <div id="board-container" id="board">
+        <svg id="svg-overlay"></svg>
     </div>
 
-    <!-- MODAL SOAL -->
-    <div id="quiz-modal">
-        <div id="quiz-container">
-            <h3 id="q-text">Pertanyaan akan muncul di sini?</h3>
-            <div id="options"></div>
+    <div id="side-panel">
+        <div style="text-align: center;">
+            <p id="player-label" style="font-weight: bold; margin-top: 0;">Giliran: Pemain 1</p>
+            <div id="dice-box" onclick="rollDice()">🎲</div>
+        </div>
+        <div id="avatar-display">
+            <img src="https://cdn-icons-png.flaticon.com/512/4333/4333609.png" width="80" alt="avatar">
         </div>
     </div>
+</div>
 
-    <!-- AUDIO ASSETS -->
-    <!-- Catatan: Ganti URL ini dengan file suara asli Anda jika ingin offline -->
-    <audio id="bgm" loop src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"></audio>
-    <audio id="snd-ting" src="https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3"></audio>
-    <audio id="snd-tetot" src="https://assets.mixkit.co/active_storage/sfx/2955/2955-preview.mp3"></audio>
+<!-- Modal Kuis -->
+<div id="quiz-modal">
+    <div id="quiz-content">
+        <h2 id="q-title">Pertanyaan!</h2>
+        <img id="q-image" class="animal-img" src="" alt="animal">
+        <p id="q-text" style="font-size: 1.2em; font-weight: bold;"></p>
+        <div id="options">
+            <button class="opt-btn btn-herbivora" onclick="answer('Herbivora')">Herbivora</button>
+            <button class="opt-btn btn-karnivora" onclick="answer('Karnivora')">Karnivora</button>
+            <button class="opt-btn btn-omnivora" onclick="answer('Omnivora')">Omnivora</button>
+        </div>
+    </div>
+</div>
 
-    <script>
-        const totalCells = 30;
-        const columns = 6;
-        const players = [];
-        let currentPlayer = 0;
-        
-        // Konfigurasi Ular & Tangga {dari: ke}
-        const links = {
-            3: 15,  // Tangga
-            8: 20,  // Tangga
-            17: 5,  // Ular
-            24: 12, // Ular
-            21: 29  // Tangga
-        };
+<!-- Sound Effects -->
+<audio id="sfx-correct" src="https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3"></audio>
+<audio id="sfx-wrong" src="https://assets.mixkit.co/active_storage/sfx/2955/2955-preview.mp3"></audio>
+<audio id="sfx-slide" src="https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3"></audio>
 
-        const questions = [
-            { q: "Berapa 5 + 5?", a: ["8", "10", "12"], c: 1 },
-            { q: "Ibu membeli 3 apel, lalu beli lagi 2. Berapa jumlahnya?", a: ["5", "6", "4"], c: 0 },
-            { q: "Ejaan angka 12 yang benar?", a: ["Dua belas", "Dua blas", "Sepuluh dua"], c: 0 },
-            { q: "Simbol angka delapan?", a: ["7", "9", "8"], c: 2 }
-        ];
+<script>
+    const totalCells = 50;
+    const cols = 10;
+    let playerPos = 1;
 
-        function createBoard() {
-            const board = document.getElementById('board-container');
-            for (let i = totalCells; i >= 1; i--) {
+    // Data Ular & Tangga {dari: ke}
+    const links = {
+        3: 17, 10: 12, 18: 38, // Tangga
+        15: 5, 24: 1, 48: 32   // Ular
+    };
+
+    // Bank Soal Hewan
+    const questions = [
+        { name: "Sapi", type: "Herbivora", img: "https://t3.ftcdn.net/jpg/02/10/73/04/360_F_210730419_3SNoK3mY3A932Ea88T0C9oF79yXzX5N9.jpg" },
+        { name: "Harimau", type: "Karnivora", img: "https://images.unsplash.com/photo-1508249400262-10878544e331?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=60" },
+        { name: "Monyet", type: "Omnivora", img: "https://images.unsplash.com/photo-1540573133985-87b6da6d54a9?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=60" },
+        { name: "Singa", type: "Karnivora", img: "https://images.unsplash.com/photo-1546182990-dffeafbe841d?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=60" },
+        { name: "Kelinci", type: "Herbivora", img: "https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=60" }
+    ];
+
+    let currentQ = {};
+
+    function createBoard() {
+        const board = document.getElementById('board-container');
+        // Membuat urutan angka berkelok (boustrophedon)
+        for (let row = 4; row >= 0; row--) {
+            for (let col = 0; col < 10; col++) {
+                let cellId;
+                if (row % 2 === 0) {
+                    cellId = (row * 10) + (col + 1);
+                } else {
+                    cellId = (row * 10) + (10 - col);
+                }
+                
                 const cell = document.createElement('div');
                 cell.className = 'cell';
-                cell.innerHTML = `<span class="cell-number">${i}</span>`;
-                
-                // Layout ular (boustrophedon)
-                let row = Math.floor((totalCells - i) / columns);
-                let col = (totalCells - i) % columns;
-                cell.style.gridColumn = (row % 2 === 0) ? (columns - col) : (col + 1);
-                
-                cell.setAttribute('data-id', i);
+                cell.id = `cell-${cellId}`;
+                cell.innerText = cellId;
                 board.appendChild(cell);
             }
-            drawLinks();
         }
+        
+        // Tambah Pion
+        const pion = document.createElement('img');
+        pion.id = 'player-pion';
+        pion.className = 'pion';
+        pion.src = 'https://cdn-icons-png.flaticon.com/512/4333/4333609.png';
+        document.getElementById('board-container').appendChild(pion);
+        updatePionPosition();
+        drawLines();
+    }
 
-        function drawLinks() {
-            const svg = document.getElementById('snakes-ladders-svg');
-            setTimeout(() => {
-                for (let start in links) {
-                    let end = links[start];
-                    let startEl = document.querySelector(`[data-id="${start}"]`).getBoundingClientRect();
-                    let endEl = document.querySelector(`[data-id="${end}"]`).getBoundingClientRect();
-                    let boardEl = document.getElementById('board-container').getBoundingClientRect();
+    function updatePionPosition() {
+        const cell = document.getElementById(`cell-${playerPos}`);
+        const pion = document.getElementById('player-pion');
+        const boardRect = document.getElementById('board-container').getBoundingClientRect();
+        const cellRect = cell.getBoundingClientRect();
 
-                    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                    line.setAttribute("x1", startEl.left - boardEl.left + 40);
-                    line.setAttribute("y1", startEl.top - boardEl.top + 40);
-                    line.setAttribute("x2", endEl.left - boardEl.left + 40);
-                    line.setAttribute("y2", endEl.top - boardEl.top + 40);
-                    
-                    if (end > start) {
-                        line.setAttribute("stroke", "green"); // Tangga
-                        line.setAttribute("stroke-width", "10");
-                        line.setAttribute("stroke-dasharray", "4");
-                    } else {
-                        line.setAttribute("stroke", "red"); // Ular
-                        line.setAttribute("stroke-width", "6");
-                    }
-                    svg.appendChild(line);
-                }
-            }, 500);
-        }
+        pion.style.left = (cellRect.left - boardRect.left + 12) + 'px';
+        pion.style.top = (cellRect.top - boardRect.top + 12) + 'px';
+    }
 
-        function startGame() {
-            document.getElementById('bgm').play();
-            document.getElementById('setup').style.display = 'none';
-            document.getElementById('play-area').style.display = 'block';
+    function rollDice() {
+        const roll = Math.floor(Math.random() * 6) + 1;
+        document.getElementById('dice-box').innerText = roll;
+        
+        playerPos += roll;
+        if (playerPos > 50) playerPos = 50;
+        
+        updatePionPosition();
+        setTimeout(triggerQuiz, 600);
+    }
+
+    function triggerQuiz() {
+        currentQ = questions[Math.floor(Math.random() * questions.length)];
+        document.getElementById('q-image').src = currentQ.img;
+        document.getElementById('q-text').innerText = `${currentQ.name} termasuk golongan hewan apa?`;
+        document.getElementById('quiz-modal').style.display = 'flex';
+    }
+
+    function answer(choice) {
+        const modal = document.getElementById('quiz-modal');
+        const sfxCorrect = document.getElementById('sfx-correct');
+        const sfxWrong = document.getElementById('sfx-wrong');
+        const sfxSlide = document.getElementById('sfx-slide');
+
+        if (choice === currentQ.type) {
+            sfxCorrect.play();
+            alert("BENAR! Lanjut bermain.");
             
-            const colors = ['var(--p1-color)', 'var(--p2-color)', 'var(--p3-color)', 'var(--p4-color)', 'var(--p5-color)'];
-            for (let i = 0; i < 5; i++) {
-                players.push({ pos: 1, color: colors[i] });
-                const pEl = document.createElement('div');
-                pEl.className = `pion pion-${i+1}`;
-                pEl.id = `pion-${i}`;
-                document.getElementById('board-container').appendChild(pEl);
-                updatePion(i);
+            // Cek Ular atau Tangga
+            if (links[playerPos]) {
+                setTimeout(() => {
+                    sfxSlide.play();
+                    playerPos = links[playerPos];
+                    updatePionPosition();
+                }, 500);
             }
-            updateTurnUI();
+        } else {
+            sfxWrong.play();
+            alert(`SALAH! ${currentQ.name} adalah ${currentQ.type}. Kamu mundur 2 kotak.`);
+            playerPos = Math.max(1, playerPos - 2);
+            updatePionPosition();
         }
 
-        function updatePion(idx) {
-            const p = players[idx];
-            const cell = document.querySelector(`[data-id="${p.pos}"]`);
-            const rect = cell.getBoundingClientRect();
-            const boardRect = document.getElementById('board-container').getBoundingClientRect();
-            const el = document.getElementById(`pion-${idx}`);
-            
-            el.style.left = (rect.left - boardRect.left + 40 + (idx * 5)) + 'px';
-            el.style.top = (rect.top - boardRect.top + 40) + 'px';
+        modal.style.display = 'none';
+        if (playerPos >= 50) {
+            alert("SELAMAT! Kamu Menang!");
+            playerPos = 1;
+            updatePionPosition();
         }
+    }
 
-        function updateTurnUI() {
-            const info = document.getElementById('turn-info');
-            info.innerText = `Giliran Pemain ${currentPlayer + 1}`;
-            info.style.backgroundColor = players[currentPlayer].color;
-        }
+    // Menggambar garis ular/tangga (Sederhana)
+    function drawLines() {
+        const svg = document.getElementById('svg-overlay');
+        const board = document.getElementById('board-container').getBoundingClientRect();
+        
+        Object.entries(links).forEach(([start, end]) => {
+            const startCell = document.getElementById(`cell-${start}`).getBoundingClientRect();
+            const endCell = document.getElementById(`cell-${end}`).getBoundingClientRect();
+            
+            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            line.setAttribute("x1", startCell.left - board.left + 30);
+            line.setAttribute("y1", startCell.top - board.top + 30);
+            line.setAttribute("x2", endCell.left - board.left + 30);
+            line.setAttribute("y2", endCell.top - board.top + 30);
+            line.setAttribute("stroke", (end > start) ? "rgba(76, 175, 80, 0.6)" : "rgba(244, 67, 54, 0.6)");
+            line.setAttribute("stroke-width", "8");
+            line.setAttribute("stroke-linecap", "round");
+            svg.appendChild(line);
+        });
+    }
 
-        function rollDice() {
-            const roll = Math.floor(Math.random() * 6) + 1;
-            document.getElementById('dice').innerText = roll;
-            
-            let p = players[currentPlayer];
-            p.pos += roll;
-            if (p.pos > 30) p.pos = 30;
-            
-            updatePion(currentPlayer);
-            
-            setTimeout(() => showQuiz(), 600);
-        }
+    window.onload = createBoard;
+</script>
 
-        function showQuiz() {
-            const q = questions[Math.floor(Math.random() * questions.length)];
-            const modal = document.getElementById('quiz-modal');
-            const qText = document.getElementById('q-text');
-            const options = document.getElementById('options');
-            
-            qText.innerText = q.q;
-            options.innerHTML = '';
-            
-            q.a.forEach((opt, i) => {
-                const btn = document.createElement('button');
-                btn.className = 'option-btn';
-                btn.innerText = opt;
-                btn.onclick = () => checkAnswer(i, q.c, btn);
-                options.appendChild(btn);
-            });
-            
-            modal.style.display = 'flex';
-        }
-
-        function checkAnswer(chosen, correct, btn) {
-            const ting = document.getElementById('snd-ting');
-            const tetot = document.getElementById('snd-tetot');
-            
-            if (chosen === correct) {
-                ting.play();
-                btn.classList.add('correct');
-                // Cek Ular/Tangga
-                if (links[players[currentPlayer].pos]) {
-                    players[currentPlayer].pos = links[players[currentPlayer].pos];
-                }
-            } else {
-                tetot.play();
-                btn.classList.add('wrong');
-                // Penalti: Mundur 2 langkah jika salah
-                players[currentPlayer].pos = Math.max(1, players[currentPlayer].pos - 2);
-            }
-
-            setTimeout(() => {
-                document.getElementById('quiz-modal').style.display = 'none';
-                updatePion(currentPlayer);
-                if (players[currentPlayer].pos >= 30) {
-                    alert(`Pemain ${currentPlayer + 1} MENANG!`);
-                    location.reload();
-                } else {
-                    currentPlayer = (currentPlayer + 1) % 5;
-                    updateTurnUI();
-                }
-            }, 1000);
-        }
-
-        createBoard();
-    </script>
 </body>
 </html>
