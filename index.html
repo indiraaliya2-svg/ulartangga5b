@@ -3,1036 +3,403 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Penjelajah Angka - Ular Tangga Edukatif</title>
+    <title>Ular Tangga Edukatif SD</title>
     <style>
-        /* --- CSS STYLING - WARNA CERAH & RAMAH ANAK --- */
         :root {
-            --primary-color: #4CAF50; /* Hijau */
-            --secondary-color: #FF9800; /* Oranye */
-            --bg-color: #E0F7FA; /* Biru Muda Pucat */
-            --text-color: #333;
-            --correct-color: #8BC34A;
-            --wrong-color: #EF5350;
-            --p1-color: #f44336; /* Merah */
-            --p2-color: #2196F3; /* Biru */
-            --p3-color: #FFEB3B; /* Kuning */
-            --p4-color: #9C27B0; /* Ungu */
-            --p5-color: #FF5722; /* Oranye Tua */
+            --primary: #4CAF50;
+            --secondary: #FF9800;
+            --danger: #f44336;
+            --sky: #E0F7FA;
         }
 
         body {
-            font-family: 'Comic Sans MS', cursive, sans-serif;
-            background-color: var(--bg-color);
-            margin: 0;
-            padding: 20px;
+            font-family: 'Arial Rounded MT Bold', 'Helvetica', sans-serif;
+            background-color: var(--sky);
             display: flex;
             flex-direction: column;
             align-items: center;
-            color: var(--text-color);
-            overflow-x: hidden;
+            margin: 0;
+            padding: 10px;
         }
 
-        h1 {
-            color: #2E7D32;
-            text-shadow: 2px 2px white;
-            margin-bottom: 10px;
-        }
-
-        /* --- layout UTAMA --- */
-        #game-container {
+        #game-wrapper {
             display: flex;
             gap: 20px;
-            max-width: 1200px;
-            width: 100%;
+            max-width: 1000px;
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
 
-        /* --- PAPAN PERMAINAN --- */
+        /* --- BOARD --- */
         #board-container {
             position: relative;
-            width: 600px;
-            height: 600px;
-            background-color: white;
-            border: 10px solid #8D6E63; /* Coklat Bingkai */
-            border-radius: 15px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            width: 500px;
+            height: 500px;
             display: grid;
             grid-template-columns: repeat(10, 1fr);
             grid-template-rows: repeat(10, 1fr);
+            border: 5px solid #5D4037;
+            background: #fff;
         }
 
         .cell {
-            border: 1px solid #ddd;
+            border: 0.5px solid #eee;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 10px;
             position: relative;
             font-weight: bold;
-            font-size: 1.2em;
+            color: #ccc;
         }
 
-        /* Warna sel belang-belang */
-        .cell:nth-child(even) { background-color: #f9f9f9; }
-        .cell:nth-child(odd) { background-color: #fff; }
+        .cell:nth-child(even) { background: #fdfdfd; }
 
-        .cell-number {
+        #overlay-svg {
             position: absolute;
-            top: 2px;
-            left: 5px;
-            font-size: 0.7em;
-            color: #888;
-        }
-
-        /* Menandai Start dan Finish */
-        .cell[data-id="1"] { background-color: #A5D6A7 !important; } /* Start */
-        .cell[data-id="100"] { background-color: #EF9A9A !important; } /* Finish */
-
-        /* --- SVG UNTUK ULAR DAN TANGGA --- */
-        #snakes-ladders-svg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none; /* Agar tidak menghalangi klik */
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
             z-index: 5;
         }
 
-        /* --- PION PEMAIN --- */
+        /* --- PION --- */
         .pion {
-            width: 30px;
-            height: 30px;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
-            border: 2px solid white;
             position: absolute;
             z-index: 10;
-            transition: all 0.3s ease-out; /* Animasi gerak halus */
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            transform: translate(-50%, -50%); /* Center point */
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
 
-        /* Ekspresi Pion (Sederhana dengan Mata) */
-        .pion::after {
-            content: '• •';
-            position: absolute;
-            top: 2px;
-            left: 6px;
-            color: black;
-            font-weight: bold;
+        /* --- UI --- */
+        #controls {
+            width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .stats {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 10px;
             font-size: 14px;
         }
 
-        /* Variasi Warna Pion 5 Pemain */
-        .pion-1 { background-color: var(--p1-color); }
-        .pion-2 { background-color: var(--p2-color); }
-        .pion-3 { background-color: var(--p3-color); }
-        .pion-4 { background-color: var(--p4-color); }
-        .pion-5 { background-color: var(--p5-color); }
-
-        /* Animasi ekspresi saat benar/salah */
-        @keyframes pion-happy {
-            0%, 100% { transform: translate(-50%, -50%) scale(1); }
-            50% { transform: translate(-50%, -60%) scale(1.2); }
-        }
-        @keyframes pion-sad {
-            0%, 100% { transform: translate(-50%, -50%) rotate(0deg); }
-            25% { transform: translate(-50%, -50%) rotate(15deg); }
-            75% { transform: translate(-50%, -50%) rotate(-15deg); }
-        }
-
-        .happy { animation: pion-happy 0.5s ease 2; }
-        .sad { animation: pion-sad 0.5s ease 2; }
-
-        /* --- PANEL KONTROL & SKOR --- */
-        #control-panel {
-            flex: 1;
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        #turn-indicator {
-            font-size: 1.3em;
-            margin-bottom: 15px;
-            font-weight: bold;
-            padding: 10px;
-            border-radius: 8px;
-            width: 100%;
-            text-align: center;
-        }
-
-        #scoreboard {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-
-        #scoreboard th, #scoreboard td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-
-        #scoreboard th { background-color: #f2f2f2; }
-
-        .player-score-row.active {
-            background-color: #e8f5e9;
-            font-weight: bold;
-        }
-
-        /* --- DADU --- */
-        #dice-container {
-            margin: 20px 0;
-            text-align: center;
-        }
-
-        #dice {
-            width: 60px;
-            height: 60px;
-            background: white;
-            border: 3px solid #333;
-            border-radius: 10px;
-            display: inline-flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 2em;
-            font-weight: bold;
+        button {
+            padding: 15px;
+            font-size: 18px;
             cursor: pointer;
-            box-shadow: 0 4px 0 #333;
-            transition: all 0.1s;
-        }
-
-        #dice:active {
-            transform: translateY(4px);
-            box-shadow: 0 0px 0 #333;
-        }
-
-        #dice.rolling {
-            animation: roll 0.5s infinite;
-        }
-
-        @keyframes roll {
-            0% { transform: rotate(0deg); }
-            25% { transform: rotate(90deg) scale(1.1); }
-            50% { transform: rotate(180deg); }
-            75% { transform: rotate(270deg) scale(1.1); }
-            100% { transform: rotate(360deg); }
-        }
-
-        button#roll-btn, button#start-btn {
-            background-color: var(--secondary-color);
-            color: white;
             border: none;
-            padding: 10px 20px;
-            font-size: 1.2em;
-            border-radius: 5px;
-            cursor: pointer;
-            font-family: 'Comic Sans MS', cursive;
-            margin-top: 10px;
+            border-radius: 10px;
+            background: var(--secondary);
+            color: white;
+            font-weight: bold;
+            transition: 0.2s;
         }
-        button#roll-btn:disabled { background-color: #ccc; cursor: not-allowed; }
 
-        /* --- MODAL SOAL (QUIZ OVERLAY) --- */
+        button:hover { filter: brightness(1.1); }
+        button:disabled { background: #ccc; }
+
+        /* --- MODAL SOAL --- */
         #quiz-modal {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.7);
-            display: none; /* Sembunyi secara default */
+            top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
             justify-content: center;
             align-items: center;
             z-index: 100;
         }
 
-        #quiz-container {
-            background-color: white;
+        .modal-content {
+            background: white;
             padding: 30px;
             border-radius: 20px;
-            max-width: 500px;
-            width: 90%;
             text-align: center;
-            position: relative;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            border: 5px solid var(--primary-color);
+            max-width: 400px;
+            width: 90%;
         }
 
-        #quiz-header {
-            font-size: 1.2em;
-            color: var(--primary-color);
-            margin-bottom: 15px;
-            font-weight: bold;
-        }
-
-        #reading-text {
-            background: #f9f9f9;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            text-align: left;
-            border-left: 5px solid #ccc;
-            display: none; /* Muncul jika tipe bacaan */
-        }
-
-        #question-text {
-            font-size: 1.4em;
-            margin-bottom: 20px;
-        }
-
-        #options-container, #boolean-container {
+        .ans-btns {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
+            gap: 10px;
             margin-top: 20px;
         }
 
-        #input-container {
-            margin-top: 20px;
-            display: none;
-        }
+        .ans-btn { background: #eee; color: #333; font-size: 14px; }
+        .ans-btn.correct { background: var(--primary); color: white; }
+        .ans-btn.wrong { background: var(--danger); color: white; }
 
-        #input-answer {
-            padding: 10px;
-            font-size: 1.2em;
-            width: 80%;
-            border-radius: 5px;
-            border: 2px solid #ccc;
-        }
-
-        .option-btn {
-            background-color: #f0f0f0;
-            border: 2px solid #ccc;
-            padding: 15px;
-            font-size: 1.1em;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-family: 'Comic Sans MS', cursive;
-        }
-
-        .option-btn:hover { background-color: #e0e0e0; }
-
-        /* Warna saat jawaban terpilih */
-        .option-btn.correct { background-color: var(--correct-color) !important; color: white; border-color: #689F38; }
-        .option-btn.wrong { background-color: var(--wrong-color) !important; color: white; border-color: #D32F2F; }
-
-        #submit-input-btn {
-            margin-top: 10px;
-            padding: 10px 20px;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        /* --- SCREEN AKHIR (GAME OVER) --- */
-        #end-screen {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-color: var(--bg-color);
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 200;
-        }
-
-        #final-message { font-size: 2em; margin-bottom: 20px; text-align: center;}
-        #final-scores { margin-bottom: 30px; font-size: 1.2em;}
-
-        /* --- RESPONSIVE DASAR --- */
-        @media (max-width: 900px) {
-            #game-container { flex-direction: column-reverse; align-items: center; }
-            #board-container { width: 95vw; height: 95vw; max-width: 500px; max-height: 500px;}
+        .dice-view {
+            font-size: 50px;
+            text-align: center;
+            margin: 10px 0;
         }
     </style>
 </head>
 <body>
 
-    <h1>🎮 Penjelajah Angka: Ular Tangga 🐍</h1>
+    <h1 style="color: #2E7D32;">🐍 Ular Tangga Angka Pintar 🪜</h1>
 
-    <div id="game-container">
-        <!-- PAPAN -->
+    <div id="game-wrapper">
         <div id="board-container">
-            <svg id="snakes-ladders-svg" viewBox="0 0 600 600" preserveAspectRatio="none">
-                <!-- Definisikan marker panah untuk tangga -->
+            <svg id="overlay-svg">
                 <defs>
-                    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
-                        <polygon points="0 0, 10 3.5, 0 7" fill="#4CAF50" />
+                    <marker id="arrow" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto">
+                        <path d="M0,0 L10,5 L0,10 Z" fill="green" />
                     </marker>
                 </defs>
-                <!-- Garis Ular & Tangga akan digambar di sini oleh JS -->
             </svg>
-            <!-- Sel papan akan digenerate oleh JS -->
-            <!-- Pion pemain akan dimasukkan di sini -->
+            <!-- Sel & Pion akan diisi JS -->
         </div>
 
-        <!-- PANEL KONTROL -->
-        <div id="control-panel">
-            <div id="game-setup">
-                <h3>Selamat Datang!</h3>
-                <p>Klik tombol di bawah untuk mulai.</p>
-                <button id="start-btn">Mulai Permainan</button>
-            </div>
-
-            <div id="game-play" style="display:none; width: 100%;">
-                <div id="turn-indicator">Giliran Pemain 1</div>
-
-                <table id="scoreboard">
-                    <thead>
-                        <tr>
-                            <th>Pion</th>
-                            <th>Pemain</th>
-                            <th>Posisi</th>
-                            <th>Skor</th>
-                        </tr>
-                    </thead>
-                    <tbody id="score-body">
-                        <!-- Data skor digenerate JS -->
-                    </tbody>
-                </table>
-
-                <div id="dice-container">
-                    <div id="dice">?</div>
-                    <br>
-                    <button id="roll-btn">Lempar Dadu</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL SOAL (QUIZ) -->
-    <div id="quiz-modal">
-        <div id="quiz-container">
-            <div id="quiz-header">Pertanyaan Edukatif</div>
+        <div id="controls">
+            <div class="stats" id="info-turn">Klik "Mulai" untuk bermain!</div>
+            <div class="dice-view" id="dice-icon">🎲</div>
+            <button id="btn-main">Mulai Permainan</button>
+            <button id="btn-roll" disabled>Lempar Dadu</button>
             
-            <div id="reading-text"></div>
-            <div id="question-text">Loading soal...</div>
-
-            <!-- Tipe 1 & 4: Pilihan Ganda -->
-            <div id="options-container">
-                <button class="option-btn" data-opt="a" id="opt-a">A</button>
-                <button class="option-btn" data-opt="b" id="opt-b">B</button>
-            </div>
-
-            <!-- Tipe 2: Benar/Salah (B/S) -->
-            <div id="boolean-container" style="display:none;">
-                <button class="option-btn" data-opt="B">B (Benar)</button>
-                <button class="option-btn" data-opt="S">S (Salah)</button>
-            </div>
-
-            <!-- Tipe 3: Isian -->
-            <div id="input-container">
-                <input type="text" id="input-answer" placeholder="Ketik jawabanmu di sini...">
-                <br>
-                <button id="submit-input-btn">Kirim</button>
+            <div id="scoreboard" class="stats">
+                <strong>Skor:</strong><br>
+                <div id="score-list"></div>
             </div>
         </div>
     </div>
 
-    <!-- SCREEN AKHIR -->
-    <div id="end-screen">
-        <div id="final-message">🎉 Hebat! Permainan Selesai.</div>
-        <div id="final-scores"></div>
-        <button id="start-btn" onclick="location.reload()">Main Lagi</button>
+    <!-- MODAL QUIZ -->
+    <div id="quiz-modal">
+        <div class="modal-content">
+            <h3 id="quiz-q">Pertanyaan</h3>
+            <div id="quiz-story" style="font-size: 12px; font-style: italic; margin-bottom: 10px; background: #f0f0f0; padding: 5px; display:none;"></div>
+            <div class="ans-btns" id="ans-container"></div>
+            <div id="input-box" style="display:none; margin-top:15px;">
+                <input type="text" id="raw-input" style="padding:10px; width:80%;">
+                <button id="btn-submit-input" style="padding:5px 10px; font-size:14px; margin-top:5px;">Kirim</button>
+            </div>
+        </div>
     </div>
-
-    <!-- AUDIO (Ganti src dengan file mp3 Anda) -->
-    <audio id="snd-bg" loop>
-        <source src="backsound.mp3" type="audio/mpeg">
-    </audio>
-    <audio id="snd-correct">
-        <source src="benar.mp3" type="audio/mpeg">
-    </audio>
-    <audio id="snd-wrong">
-        <source src="salah.mp3" type="audio/mpeg">
-    </audio>
-    <audio id="snd-ladder">
-        <source src="tangga.mp3" type="audio/mpeg">
-    </audio>
-    <audio id="snd-snake">
-        <source src="ular.mp3" type="audio/mpeg">
-    </audio>
 
     <script>
-        /* --- JAVASCRIPT GAME LOGIC --- */
-
-        // 1. DATA SOAL (SESUAI PROMPT)
-        const questionsData = {
-            type1: [ // Pilihan Ganda Penulisan Angka
-                { q: "Berat semangka itu …", a: "delapan kilogram", b: "8 kilogram", correct: "b" },
-                { q: "Harga buku tulis itu …", a: "Rp5.000,00", b: "lima ribu rupiah", correct: "a" },
-                { q: "Alamat rumah Siti di …", a: "Jalan Mawar nomor sembilan", b: "Jalan Mawar No. 9", correct: "b" },
-                { q: "Panjang meja itu …", a: "dua meter", b: "2 meter", correct: "b" },
-                { q: "Dana pembangunan taman sebesar …", a: "300 juta rupiah", b: "tiga ratus juta rupiah", correct: "a" }
-            ],
-            type2: [ // Benar / Salah (B/S)
-                { q: "Rp15.000,00", correct: "B" },
-                { q: "Jalan Anggrek No. 10", correct: "B" },
-                { q: "lima meter", correct: "S" },
-                { q: "12 kilogram", correct: "B" },
-                { q: "dua belas ribu rupiah", correct: "S" }
-            ],
-            type3: [ // Isian Singkat
-                { q: "Ibu membeli gula ___ kilogram", correct: "2" },
-                { q: "Harga gula tersebut ___ rupiah", correct: "Rp10.000,00" },
-                { q: "Rumah ibu di Jalan Kenanga No. ___", correct: "7" }
-            ],
-            type4: [ // Bacaan
-                { 
-                    story: "“Siti akan pergi ke Bandung untuk mengunjungi neneknya. Ia berangkat naik kereta pukul 08.00 pagi dari Stasiun Jakarta. Kereta tiba di Bandung pukul 11.00 siang.”",
-                    questions: [
-                        { q: "Apa tujuan perjalanan Siti?", a: "Liburan ke pantai", b: "Mengunjungi neneknya", correct: "b" },
-                        { q: "Siti berangkat pukul …", a: "08.00", b: "11.00", correct: "a" },
-                        { q: "Siti naik apa?", a: "Bus", b: "Kereta", correct: "b" },
-                        { q: "Berapa lama perjalanan Siti?", a: "3 jam", b: "2 jam", correct: "a" },
-                        { q: "Siti berangkat dari mana?", a: "Bandung", b: "Jakarta", correct: "b" }
-                    ]
-                }
-            ]
+        /** --- AUDIO ENGINE (CDN LINKS) --- **/
+        const sounds = {
+            bg: new Audio('https://assets.mixkit.co/music/preview/mixkit-funny-paws-583.mp3'),
+            correct: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-winning-chime-2029.mp3'),
+            wrong: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-funny-fail-low-tone-2856.mp3'),
+            move: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-click-melodic-1120.mp3'),
+            win: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-video-game-win-2016.mp3')
         };
+        sounds.bg.loop = true;
+        sounds.bg.volume = 0.3;
 
-        // Mengacak soal (Fitur Tambahan)
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-        }
-        shuffleArray(questionsData.type1);
-        shuffleArray(questionsData.type2);
-        shuffleArray(questionsData.type3);
-
-        // Pool soal gabungan agar bervariasi
-        let masterQuestionPool = [];
-        // Masukkan tipe 1, 2, 3
-        questionsData.type1.forEach(item => masterQuestionPool.push({...item, type: 1}));
-        questionsData.type2.forEach(item => masterQuestionPool.push({...item, type: 2}));
-        questionsData.type3.forEach(item => masterQuestionPool.push({...item, type: 3}));
-        // Masukkan tipe 4 (bacaan diekstrak jadi soal individu)
-        questionsData.type4.forEach(storyItem => {
-            storyItem.questions.forEach(q => {
-                masterQuestionPool.push({...q, story: storyItem.story, type: 4});
-            });
-        });
-        shuffleArray(masterQuestionPool); // Acak semua
-        let currentQuestionIndex = 0;
-
-
-        // 2. KONFIGURASI PAPAN (ULAR & TANGGA)
-        const boardSize = 10; // 10x10
-        const totalCells = boardSize * boardSize;
-        
-        // Peta Ular & Tangga { dari: ke }
-        const snakesAndLadders = {
-            // Tangga (Naik)
-            3: 22, 5: 14, 20: 38, 11: 29, 36: 44, 50: 69, 62: 81, 74: 93,
-            // Ular (Turun)
-            27: 7, 35: 15, 47: 19, 65: 52, 77: 58, 83: 57, 92: 71, 98: 80
-        };
-
-        // 3. STATE PERMAINAN
-        const numPlayers = 5;
+        /** --- KONFIGURASI GAME --- **/
+        const boardSize = 10;
         let players = [];
-        let currentPlayerIndex = 0;
-        let isRolling = false;
-        let isAnimateMoving = false;
-        let pendingLandedCell = null; // Menyimpan sel tempat mendarat sebelum jawab soal
+        let currentPlayer = 0;
+        let snakesLadders = {};
+        const colors = ['#f44336', '#2196F3', '#FFEB3B', '#9C27B0', '#FF9800'];
+        
+        const questions = [
+            { type: 'pg', q: "Berat semangka itu...", a: "delapan kilogram", b: "8 kilogram", correct: "b" },
+            { type: 'pg', q: "Harga buku itu...", a: "Rp5.000,00", b: "lima ribu rupiah", correct: "a" },
+            { type: 'bs', q: "Rp15.000,00", correct: "B" },
+            { type: 'bs', q: "lima meter", correct: "S" },
+            { type: 'isi', q: "Ibu membeli gula ___ kilogram", correct: "2" },
+            { type: 'baca', story: "Siti berangkat jam 08.00, tiba jam 11.00.", q: "Berapa jam perjalanan?", a: "3 jam", b: "2 jam", correct: "a" }
+        ];
 
-        // DOM Elements
-        const boardEl = document.getElementById('board-container');
-        const svgEl = document.getElementById('snakes-ladders-svg');
-        const diceEl = document.getElementById('dice');
-        const rollBtn = document.getElementById('roll-btn');
-        const turnIndEl = document.getElementById('turn-indicator');
-        const scoreBodyEl = document.getElementById('score-body');
-        const quizModalEl = document.getElementById('quiz-modal');
-        const quizContainerEl = document.getElementById('quiz-container');
-
-        // Audio Elements
-        const audBg = document.getElementById('snd-bg');
-        const audCorrect = document.getElementById('snd-correct');
-        const audWrong = document.getElementById('snd-wrong');
-        const audLadder = document.getElementById('snd-ladder');
-        const audSnake = document.getElementById('snd-snake');
-
-
-        // 4. INISIALISASI PERMAINAN
-        function initGame() {
-            createBoard();
-            drawSnakesLadders();
-            setupPlayers();
-            updateScoreboard();
-            
-            document.getElementById('start-btn').addEventListener('click', startGame);
-            rollBtn.addEventListener('click', rollDice);
-        }
-
-        function startGame() {
-            // Mulai Backsound
-            audBg.play().catch(e => console.log("Audio autoplay diblokir browser, butuh interaksi user."));
-            document.getElementById('game-setup').style.display = 'none';
-            document.getElementById('game-play').style.display = 'block';
-            updateTurnIndicator();
-        }
-
-        // Membuat Kotak Papan (Metode Boustrophedon / Ular)
-        function createBoard() {
-            for (let i = totalCells; i >= 1; i--) {
+        /** --- CORE LOGIC --- **/
+        function initBoard() {
+            const container = document.getElementById('board-container');
+            for (let i = 100; i >= 1; i--) {
                 const cell = document.createElement('div');
                 cell.className = 'cell';
-                cell.dataset.id = i;
+                cell.id = `cell-${i}`;
+                cell.innerHTML = `<span>${i}</span>`;
                 
-                // Menghitung baris dan kolom untuk layout grid
-                let row = Math.floor((totalCells - i) / boardSize);
-                let col = (totalCells - i) % boardSize;
+                // Urutan Ular (Boustrophedon)
+                let row = Math.floor((100 - i) / 10);
+                let col = (100 - i) % 10;
+                if (row % 2 === 1) cell.style.gridColumn = col + 1;
+                else cell.style.gridColumn = 10 - col;
                 
-                // Arah ular (kanan-kiri berganit tiap baris)
-                if (row % 2 === 1) {
-                    cell.style.gridColumn = boardSize - col;
-                } else {
-                    cell.style.gridColumn = col + 1;
-                }
-                cell.style.gridRow = row + 1;
+                container.appendChild(cell);
+            }
+            generateSnakesLadders();
+        }
 
-                // Nomor sel kecil
-                const numSpan = document.createElement('span');
-                numSpan.className = 'cell-number';
-                numSpan.innerText = i;
-                cell.appendChild(numSpan);
+        function generateSnakesLadders() {
+            // Acak 4 Tangga & 4 Ular
+            for(let i=0; i<4; i++) {
+                let startL = Math.floor(Math.random() * 80) + 2;
+                let endL = startL + Math.floor(Math.random() * 15) + 5;
+                if(endL < 100) snakesLadders[startL] = endL;
 
-                // Ikon Khusus
-                if(i === 1) cell.innerHTML += "<br>🚀<br>START";
-                if(i === 100) cell.innerHTML += "<br>🏆<br>FINISH";
+                let startS = Math.floor(Math.random() * 80) + 20;
+                let endS = startS - Math.floor(Math.random() * 15) - 5;
+                if(endS > 1) snakesLadders[startS] = endS;
+            }
+            drawLinks();
+        }
 
-                boardEl.appendChild(cell);
+        function drawLinks() {
+            const svg = document.getElementById('overlay-svg');
+            for (let start in snakesLadders) {
+                let end = snakesLadders[start];
+                let startEl = document.getElementById(`cell-${start}`).getBoundingClientRect();
+                let endEl = document.getElementById(`cell-${end}`).getBoundingClientRect();
+                let boardEl = document.getElementById('board-container').getBoundingClientRect();
+
+                let line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                line.setAttribute("x1", startEl.left - boardEl.left + 25);
+                line.setAttribute("y1", startEl.top - boardEl.top + 25);
+                line.setAttribute("x2", endEl.left - boardEl.left + 25);
+                line.setAttribute("y2", endEl.top - boardEl.top + 25);
+                line.setAttribute("stroke", end > start ? "green" : "red");
+                line.setAttribute("stroke-width", "3");
+                line.setAttribute("stroke-dasharray", end > start ? "none" : "5,5");
+                svg.appendChild(line);
             }
         }
 
-        // Mendapatkan Koordinat Center Sel (PX) untuk menggambar/pion
-        function getCellCoords(cellId) {
-            const cellEl = document.querySelector(`.cell[data-id="${cellId}"]`);
-            if (!cellEl) return null;
-            
-            // Hitung berdasarkan posisi relatif terhadap board-container
-            const boardRect = boardEl.getBoundingClientRect();
-            const cellRect = cellEl.getBoundingClientRect();
+        /** --- GAMEPLAY --- **/
+        document.getElementById('btn-main').onclick = function() {
+            sounds.bg.play(); // Mulai Backsound
+            this.style.display = 'none';
+            document.getElementById('btn-roll').disabled = false;
+            setupPlayers();
+            updateUI();
+        };
 
-            return {
-                x: cellRect.left - boardRect.left + cellRect.width / 2,
-                y: cellRect.top - boardRect.top + cellRect.height / 2
-            };
-        }
-
-        // Menggambar Garis Ular dan Tangga di SVG
-        function drawSnakesLadders() {
-            // Tunggu sebentar agar DOM rendering selesai untuk dpt koordinat tepat
-            setTimeout(() => {
-                for (let from in snakesAndLadders) {
-                    let to = snakesAndLadders[from];
-                    let startC = getCellCoords(from);
-                    let endC = getCellCoords(to);
-
-                    if (!startC || !endC) continue;
-
-                    const isLadder = to > from;
-                    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                    
-                    line.setAttribute("x1", startC.x);
-                    line.setAttribute("y1", startC.y);
-                    line.setAttribute("x2", endC.x);
-                    line.setAttribute("y2", endC.y);
-                    
-                    if (isLadder) {
-                        line.setAttribute("stroke", "#4CAF50"); // Hijau untuk tangga
-                        line.setAttribute("stroke-width", "8");
-                        line.setAttribute("stroke-dasharray", "5,5"); // Garis putus-putus
-                        line.setAttribute("marker-end", "url(#arrowhead)");
-                    } else {
-                        line.setAttribute("stroke", "#F44336"); // Merah untuk ular
-                        line.setAttribute("stroke-width", "6");
-                        line.setAttribute("stroke-linecap", "round");
-                        // Membuat sedikit melengkung (pake path sebenarnya lebih bagus, ini simpelnya)
-                        line.setAttribute("opacity", "0.7");
-                    }
-                    svgEl.appendChild(line);
-                }
-            }, 100);
-        }
-
-        // Setup Data dan Pion Pemain
         function setupPlayers() {
-            const colors = ['var(--p1-color)', 'var(--p2-color)', 'var(--p3-color)', 'var(--p4-color)', 'var(--p5-color)'];
-            for (let i = 0; i < numPlayers; i++) {
-                // Data
-                players.push({
-                    id: i + 1,
-                    name: "Pemain " + (i + 1),
-                    position: 1, // Mulai di sel 1
-                    score: 0,
-                    color: colors[i]
-                });
-
-                // Visual Pion
-                const pion = document.createElement('div');
-                pion.className = `pion pion-${i+1}`;
-                pion.id = `pion-${i}`;
-                boardEl.appendChild(pion);
-                placePionVisual(i, 1); // Letakkan di start
+            for(let i=0; i<5; i++) {
+                players.push({ id: i, pos: 1, score: 0, color: colors[i] });
+                let p = document.createElement('div');
+                p.className = 'pion';
+                p.id = `pion-${i}`;
+                p.style.backgroundColor = colors[i];
+                document.getElementById('board-container').appendChild(p);
+                moveVisual(i, 1);
             }
         }
 
-        // Menempatkan visual pion di sel tertentu (tanpa animasi)
-        function placePionVisual(playerIdx, cellId) {
-            const coords = getCellCoords(cellId);
-            const pion = document.getElementById(`pion-${playerIdx}`);
-            if (coords && pion) {
-                // Beri sedikit offset acak agar pion tidak tumpang tindih sempurna jika di sel sama
-                const offset = (playerIdx - 2) * 5; 
-                pion.style.left = (coords.x + offset) + 'px';
-                pion.style.top = (coords.y + offset) + 'px';
+        async function rollDice() {
+            document.getElementById('btn-roll').disabled = true;
+            let roll = Math.floor(Math.random() * 6) + 1;
+            document.getElementById('dice-icon').innerText = ['⚀','⚁','⚂','⚃','⚄','⚅'][roll-1];
+            
+            let p = players[currentPlayer];
+            for(let i=0; i<roll; i++) {
+                if(p.pos < 100) {
+                    p.pos++;
+                    moveVisual(currentPlayer, p.pos);
+                    sounds.move.play();
+                    await new Promise(r => setTimeout(r, 300));
+                }
             }
-        }
-
-        // Update Tabel Skor
-        function updateScoreboard() {
-            scoreBodyEl.innerHTML = '';
-            players.forEach((p, index) => {
-                const row = document.createElement('tr');
-                row.className = 'player-score-row';
-                if (index === currentPlayerIndex) row.className += ' active';
-
-                row.innerHTML = `
-                    <td><div style="width:15px; height:15px; border-radius:50%; background:${p.color}; border:1px solid#333;"></div></td>
-                    <td>${p.name}</td>
-                    <td>${p.position}</td>
-                    <td style="font-weight:bold; color:var(--primary-color);">${p.score}</td>
-                `;
-                scoreBodyEl.appendChild(row);
-            });
-        }
-
-        function updateTurnIndicator() {
-            const cp = players[currentPlayerIndex];
-            turnIndEl.innerText = `Giliran ${cp.name}`;
-            turnIndEl.style.backgroundColor = cp.color;
-            turnIndEl.style.color = (currentPlayerIndex === 2) ? 'black' : 'white'; // Kuning pake teks hitam
-        }
-
-
-        // 5. LOGIKA LOGIKA DADU & GERAKAN
-        function rollDice() {
-            if (isRolling || isAnimateMoving) return;
-            isRolling = true;
-            rollBtn.disabled = true;
-
-            // Animasi Dadu
-            diceEl.classList.add('rolling');
-            diceEl.innerText = "?";
-
-            setTimeout(() => {
-                // Angka acak 1-6
-                const roll = Math.floor(Math.random() * 6) + 1;
-                diceEl.classList.remove('rolling');
-                diceEl.innerText = roll;
-                isRolling = false;
-
-                movePlayerSteps(currentPlayerIndex, roll);
-            }, 1000);
-        }
-
-        // Menggerakkan pion langkah demi langkah (Animasi)
-        async function movePlayerSteps(playerIdx, steps) {
-            isAnimateMoving = true;
-            let p = players[playerIdx];
-            let startPos = p.position;
-            let targetPos = startPos + steps;
-
-            // Batasi maksimal 100
-            if (targetPos > totalCells) {
-                targetPos = totalCells; // Sederhananya langsung ke 100, opsional: harus angka pas
-            }
-
-            // Gerak maju satu per satu
-            for (let i = 1; i <= steps; i++) {
-                let nextStep = startPos + i;
-                if (nextStep > totalCells) break;
-
-                p.position = nextStep;
-                placePionVisual(playerIdx, nextStep);
-                updateScoreboard(); // Update posisi di tabel
-
-                // Tunggu durasi animasi css (0.3s) sebelum langkah berikutnya
-                await new Promise(resolve => setTimeout(resolve, 350));
-            }
-
-            isAnimateMoving = false;
-            handleLanding(playerIdx);
-        }
-
-        // Logika setelah pion berhenti melangkah
-        function handleLanding(playerIdx) {
-            let p = players[playerIdx];
-            let currentPos = p.position;
-
-            pendingLandedCell = currentPos; // Simpan posisi
-
-            // Cek apakah di Finish
-            if (currentPos === 100) {
-                endGame();
-                return;
-            }
-
-            // Munculkan Soal
             showQuiz();
         }
 
-        // Eksekusi Ular atau Tangga (setelah jawab soal benar)
-        async function checkSnakesLadders(playerIdx) {
-            let p = players[playerIdx];
-            let pos = p.position;
-
-            if (snakesAndLadders[pos]) {
-                let targetPos = snakesAndLadders[pos];
-                const isLadder = targetPos > pos;
-
-                // Efek Suara
-                if (isLadder) audLadder.play();
-                else audSnake.play();
-
-                // Animasi Gerak Langsung ke Tujuan
-                isAnimateMoving = true;
-                
-                // Beri reaksi visual pada pion (happy/sad)
-                const pionEl = document.getElementById(`pion-${playerIdx}`);
-                pionEl.classList.add(isLadder ? 'happy' : 'sad');
-
-                p.position = targetPos;
-                placePionVisual(playerIdx, targetPos);
-                
-                await new Promise(resolve => setTimeout(resolve, 800)); // Tunggu animasi gerak + ekspresi
-                
-                pionEl.classList.remove('happy', 'sad');
-                isAnimateMoving = false;
-                updateScoreboard();
-
-                // Jika setelah naik/turun di 100
-                if(p.position === 100) {
-                    endGame();
-                    return;
-                }
-            }
-
-            // Lanjut Giliran
-            nextTurn();
-        }
-
-        function nextTurn() {
-            currentPlayerIndex = (currentPlayerIndex + 1) % numPlayers;
-            updateTurnIndicator();
-            updateScoreboard();
-            rollBtn.disabled = false;
-            diceEl.innerText = "?";
-        }
-
-
-        // 6. LOGIKA QUIZ (SOAL EDUKATIF)
-        let currentCorrectAnswer = "";
-
         function showQuiz() {
-            // Ambil soal berdasarkan index master pool
-            const qData = masterQuestionPool[currentQuestionIndex];
-            // Increment index untuk soal berikutnya (loop kembali jika habis)
-            currentQuestionIndex = (currentQuestionIndex + 1) % masterQuestionPool.length;
-
-            currentCorrectAnswer = qData.correct;
-
-            // Reset Tampilan Modal
-            document.getElementById('reading-text').style.display = 'none';
-            document.getElementById('options-container').style.display = 'none';
-            document.getElementById('boolean-container').style.display = 'none';
-            document.getElementById('input-container').style.display = 'none';
-            document.getElementById('input-answer').value = ''; // reset input
+            const modal = document.getElementById('quiz-modal');
+            const qData = questions[Math.floor(Math.random() * questions.length)];
+            const container = document.getElementById('ans-container');
+            const inputContainer = document.getElementById('input-box');
             
-            // Reset state tombol
-            document.querySelectorAll('.option-btn').forEach(b => b.className = 'option-btn');
+            document.getElementById('quiz-q').innerText = qData.q;
+            container.innerHTML = '';
+            inputContainer.style.display = 'none';
+            document.getElementById('quiz-story').style.display = 'none';
 
-            // Set Teks Soal
-            document.getElementById('question-text').innerText = qData.q;
-
-            // Tampilkan berdasarkan Tipe
-            if (qData.type === 1 || qData.type === 4) {
-                // Pilihan Ganda (Tipe 4 pake story)
-                document.getElementById('options-container').style.display = 'grid';
-                if(qData.type === 4) {
-                    const readEl = document.getElementById('reading-text');
-                    readEl.innerText = qData.story;
-                    readEl.style.display = 'block';
-                    document.getElementById('quiz-header').innerText = "Bacaan";
-                } else {
-                    document.getElementById('quiz-header').innerText = "Pilih Penulisan yang Benar";
+            if(qData.type === 'pg' || qData.type === 'baca') {
+                if(qData.story) {
+                    document.getElementById('quiz-story').innerText = qData.story;
+                    document.getElementById('quiz-story').style.display = 'block';
                 }
-
-                // Mengacak posisi A dan B (Fitur Prompt)
-                let opts = [
-                    {text: qData.a, val: 'a'},
-                    {text: qData.b, val: 'b'}
-                ];
-                if(Math.random() > 0.5) opts.reverse(); // Acak
-
-                const btnA = document.getElementById('opt-a');
-                const btnB = document.getElementById('opt-b');
-                btnA.innerText = "a. " + opts[0].text;
-                btnA.dataset.opt = opts[0].val;
-                btnB.innerText = "b. " + opts[1].text;
-                btnB.dataset.opt = opts[1].val;
-
-            } else if (qData.type === 2) {
-                // Benar / Salah
-                document.getElementById('quiz-header').innerText = "Benar (B) atau Salah (S)?";
-                document.getElementById('boolean-container').style.display = 'grid';
-            } else if (qData.type === 3) {
-                // Isian
-                document.getElementById('quiz-header').innerText = "Isi Jawaban yang Benar";
-                document.getElementById('input-container').style.display = 'block';
+                ['a','b'].forEach(opt => {
+                    let btn = document.createElement('button');
+                    btn.className = 'ans-btn';
+                    btn.innerText = qData[opt];
+                    btn.onclick = () => checkAns(opt === qData.correct);
+                    container.appendChild(btn);
+                });
+            } else if(qData.type === 'bs') {
+                ['B','S'].forEach(opt => {
+                    let btn = document.createElement('button');
+                    btn.className = 'ans-btn';
+                    btn.innerText = opt;
+                    btn.onclick = () => checkAns(opt === qData.correct);
+                    container.appendChild(btn);
+                });
+            } else {
+                inputContainer.style.display = 'block';
+                document.getElementById('btn-submit-input').onclick = () => {
+                    checkAns(document.getElementById('raw-input').value === qData.correct);
+                };
             }
-
-            // Tampilkan Modal
-            quizModalEl.style.display = 'flex';
+            modal.style.display = 'flex';
         }
 
-        // Handling Klik tombol jawaban (PG & BS)
-        document.querySelectorAll('#options-container .option-btn, #boolean-container .option-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                // Cegah klik ganda
-                if(quizModalEl.style.pointerEvents === 'none') return;
-                
-                const chosen = this.dataset.opt;
-                handleAnswerSubmit(chosen, this);
+        function checkAns(isCorrect) {
+            if(isCorrect) {
+                sounds.correct.play();
+                players[currentPlayer].score += 10;
+                alert("Benar! +10 Poin");
+            } else {
+                sounds.wrong.play();
+                alert("Salah! 0 Poin");
+            }
+            
+            document.getElementById('quiz-modal').style.display = 'none';
+            document.getElementById('raw-input').value = '';
+
+            // Cek Ular/Tangga jika benar
+            if(isCorrect && snakesLadders[players[currentPlayer].pos]) {
+                players[currentPlayer].pos = snakesLadders[players[currentPlayer].pos];
+                moveVisual(currentPlayer, players[currentPlayer].pos);
+                sounds.win.play(); // Suara kemenangan singkat saat naik/selamat
+            }
+
+            if(players[currentPlayer].pos >= 100) {
+                alert("Selamat! " + (currentPlayer+1) + " Menang!");
+                location.reload();
+            } else {
+                currentPlayer = (currentPlayer + 1) % 5;
+                updateUI();
+                document.getElementById('btn-roll').disabled = false;
+            }
+        }
+
+        function moveVisual(pIdx, pos) {
+            const cell = document.getElementById(`cell-${pos}`);
+            const pion = document.getElementById(`pion-${pIdx}`);
+            const rect = cell.getBoundingClientRect();
+            const boardRect = document.getElementById('board-container').getBoundingClientRect();
+            
+            pion.style.left = (rect.left - boardRect.left + (pIdx * 5)) + 'px';
+            pion.style.top = (rect.top - boardRect.top + 5) + 'px';
+        }
+
+        function updateUI() {
+            document.getElementById('info-turn').innerText = `Giliran Pemain ${currentPlayer + 1}`;
+            document.getElementById('info-turn').style.color = colors[currentPlayer];
+            
+            let html = '';
+            players.forEach(p => {
+                html += `<div style="color:${p.color}">Pemain ${p.id+1}: ${p.score} pt (Pos: ${p.pos})</div>`;
             });
-        });
-
-        // Handling Submit Isian
-        document.getElementById('submit-input-btn').addEventListener('click', function() {
-            const inputVal = document.getElementById('input-answer').value.trim();
-            if(inputVal === "") return;
-            handleAnswerSubmit(inputVal, document.getElementById('input-answer'));
-        });
-
-        // Logika Proses Jawaban
-        function handleAnswerSubmit(chosenAnswer, elementClicked) {
-            quizModalEl.style.pointerEvents = 'none'; // Lock modal
-            let isCorrect = false;
-
-            // Cek Isian (case insensitive untuk teks, ketat untuk simbol Rp)
-            if(typeof currentCorrectAnswer === 'string' && currentCorrectAnswer.length > 1 && !['a','b','B','S'].includes(currentCorrectAnswer)) {
-                 if(chosenAnswer.toLowerCase() === currentCorrectAnswer.toLowerCase()) {
-                     isCorrect = true;
-                 }
-            } else {
-                // Cek PG / BS
-                if(chosenAnswer === currentCorrectAnswer) {
-                    isCorrect = true;
-                }
-            }
-
-            const pionEl = document.getElementById(`pion-${currentPlayerIndex}`);
-
-            if (isCorrect) {
-                // JAWABAN BENAR ✅
-                audCorrect.play();
-                players[currentPlayerIndex].score += 10;
-                
-                // Visual feedback di modal
-                if(elementClicked.tagName === 'BUTTON') elementClicked.classList.add('correct');
-                else elementClicked.style.borderColor = 'var(--correct-color)';
-
-                // Reaksi Pion Senang
-                pionEl.classList.add('happy');
-                
-            } else {
-                // JAWABAN SALAH ❌
-                audWrong.play();
-                // Skor tetap (+0)
-
-                // Visual feedback
-                if(elementClicked.tagName === 'BUTTON') elementClicked.classList.add('wrong');
-                else elementClicked.style.borderColor = 'var(--wrong-color)';
-                
-                // Tunjukkan yang benar (jika tombol)
-                if(elementClicked.tagName === 'BUTTON') {
-                     document.querySelectorAll('#quiz-container .option-btn').forEach(b => {
-                        if(b.dataset.opt === currentCorrectAnswer) b.classList.add('correct');
-                    });
-                }
-
-                // Reaksi Pion Sedih
-                pionEl.classList.add('sad');
-            }
-
-            updateScoreboard();
-
-            // Sembunyikan modal setelah delay, lalu cek ular/tangga
-            setTimeout(() => {
-                quizModalEl.style.display = 'none';
-                quizModalEl.style.pointerEvents = 'auto'; // unlock
-                pionEl.classList.remove('happy', 'sad');
-
-                // HANYA JIKA BENAR -> Bisa naik tangga / tidak turun ular (Sesuai variasi rule umum, prompt tidak spesifik soal ini, asumsi standar: jawab soal untuk 'mengaktifkan' sel mendarat. Jika salah, tetap di situ tapi gak dapet poin dan gak bisa naik tangga/kena ular dianggap 'selamat' atau 'hukuman gagal naik'). 
-                // Kita pakai rule: Jawab Benar -> Cek Ular/Tangga. Jawab Salah -> Tetap di posisi mendarat.
-                if(isCorrect) {
-                    checkSnakesLadders(currentPlayerIndex);
-                } else {
-                    nextTurn(); // Langsung ganti giliran
-                }
-
-            }, 1500);
+            document.getElementById('score-list').innerHTML = html;
         }
 
-
-        // 7. AKHIR PERMAINAN
-        function endGame() {
-            audBg.pause();
-            audBg.currentTime = 0;
-            // Suara kemenangan final (pake suara tangga aja yg singkat)
-            audLadder.play();
-
-            // Urutkan pemain berdasarkan skor tertinggi
-            let rankedPlayers = [...players].sort((a, b) => b.score - a.score);
-            let pemenang = rankedPlayers[0];
-
-            const endScreenEl = document.getElementById('end-screen');
-            const msgEl = document.getElementById('final-message');
-            const scoresEl = document.getElementById('final-scores');
-
-            // Pesan berdasarkan skor pemenang (Prompt kriteria)
-            if (pemenang.score >= 50) {
-                msgEl.innerHTML = `🎉 🎉 🎉<br>Selamat ${pemenang.name}!<br>“Hebat! Kamu penjelajah angka!”`;
-                msgEl.style.color = "#2E7D32";
-            } else {
-                msgEl.innerHTML = `🏁 Selesai!<br>Pemenangnya adalah ${pemenang.name}.<br>“Ayo coba lagi!”`;
-                msgEl.style.color = "#E65100";
-            }
-
-            // Tampilkan list skor akhir
-            let scoresHtml = "<h3>Skor Akhir:</h3><ul>";
-            rankedPlayers.forEach(p => {
-                scoresHtml += `<li>${p.name}: ${p.score} poin</li>`;
-            });
-            scoresHtml += "</ul>";
-            scoresEl.innerHTML = scoresHtml;
-
-            endScreenEl.style.display = 'flex';
-        }
-
-
-        // JALANKAN INIT SAAT LOAD
-        window.onload = initGame;
+        document.getElementById('btn-roll').onclick = rollDice;
+        window.onload = initBoard;
 
     </script>
 </body>
